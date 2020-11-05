@@ -1,10 +1,7 @@
 package com.capgemini.rentalcars.service;
 
 import com.capgemini.rentalcars.dto.RentalRequest;
-import com.capgemini.rentalcars.exception.CarAlreadyRentedException;
-import com.capgemini.rentalcars.exception.CarNotFoundException;
-import com.capgemini.rentalcars.exception.RentalNotFoundException;
-import com.capgemini.rentalcars.exception.TenantNotFoundException;
+import com.capgemini.rentalcars.exception.*;
 import com.capgemini.rentalcars.model.Car;
 import com.capgemini.rentalcars.model.Rental;
 import com.capgemini.rentalcars.model.Tenant;
@@ -68,7 +65,16 @@ public class RentalService {
         if (!tenantRepository.exists(Example.of(requestedTenant, tenantMatcher))
                 && !tenantRepository.existsById(requestedTenant.getId())) {
             throw new TenantNotFoundException(requestedTenant.toString()
-                    .concat(". At first new Tenant has to be registered!"));
+                    .concat(". At first new Tenant has to be registered!")
+            );
+        }
+    }
+
+    private void checkRentalRequest(RentalRequest rentalRequest) {
+        if (rentalRequest.getRental().getRentedCars().isEmpty()) {
+            throw new InvalidRentalRequestException("Rental request does not contain cars. "
+                    .concat("At least one car is needed! ")
+            );
         }
     }
 
@@ -83,13 +89,15 @@ public class RentalService {
                 .forEach(requestedCar -> {
                     if (!foundedCars.contains(requestedCar)) {
                         throw new CarNotFoundException(requestedCar.toString()
-                                .concat(". Car-Rental does not own this car."));
+                                .concat(". Car-Rental does not own this car.")
+                        );
                     }
                     carRepository.findById(requestedCar.getId())
                             .filter(car -> car.getRental() == null)
                             .orElseThrow(() -> new CarAlreadyRentedException(requestedCar.toString()
                                     .concat(" is already rented by Tenant with id:")
-                                    .concat(requestedRental.getTenant().getId().toString())));
+                                    .concat(requestedRental.getTenant().getId().toString()))
+                            );
                 });
     }
 
@@ -105,6 +113,8 @@ public class RentalService {
         // Check if tenant from provided rental request already exists in tenant repository
         final Tenant requestedTenant = rentalRequest.getRental().getTenant();
         checkTenantExistence(requestedTenant);
+        // Check if rental request contains at least one car
+        checkRentalRequest(rentalRequest);
         /*
             Check if car rental owns the cars from provided rental request.
             Then check car is available to rent.

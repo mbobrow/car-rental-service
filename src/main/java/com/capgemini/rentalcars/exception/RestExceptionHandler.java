@@ -57,4 +57,15 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         );
     }
 
+    @ExceptionHandler(value = {InvalidRentalRequestException.class})
+    protected ResponseEntity<Object> invalidRentalRequest(RuntimeException exception, WebRequest request) {
+        return handleExceptionInternal(
+                exception,
+                Objects.toString(exception.toString(), " "),
+                new HttpHeaders(),
+                HttpStatus.BAD_REQUEST,
+                request
+        );
+    }
+
 }

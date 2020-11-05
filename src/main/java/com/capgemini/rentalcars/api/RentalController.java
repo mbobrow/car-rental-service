@@ -41,4 +41,5 @@ public class RentalController {
         this.rentalService.cancelRental(tenant);
     }
 
+    // TODO: create @DeleteMapping cancelRental(Tenant, Set<Car>)
 }
