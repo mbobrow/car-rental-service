@@ -1,0 +1,54 @@
+package com.capgemini.rentalcars.service;
+
+import com.capgemini.rentalcars.exception.TenantNotFoundException;
+import com.capgemini.rentalcars.model.Tenant;
+import com.capgemini.rentalcars.repository.TenantRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional
+public class TenantService {
+
+    private final TenantRepository tenantRepository;
+
+    @Autowired
+    public TenantService(final TenantRepository tenantRepository) {
+        this.tenantRepository = tenantRepository;
+    }
+
+    public List<Tenant> getAllTenants() {
+        return tenantRepository.findAll();
+    }
+
+    public Tenant addTenant(final Tenant newTenant) {
+        return tenantRepository.save(newTenant);
+    }
+
+    public Tenant getTenant(final Long id) {
+        return tenantRepository.findById(id).orElseThrow(TenantNotFoundException::new);
+    }
+
+    public Tenant removeTenant(final Long id) {
+        final Optional<Tenant> tenantToBeRemoved = tenantRepository.findById(id);
+        if (!tenantToBeRemoved.isPresent()) {
+            throw new TenantNotFoundException();
+        }
+        tenantRepository.deleteById(id);
+        return tenantToBeRemoved.get();
+    }
+
+    public Tenant updateTenant(final Long id, final Tenant updatedTenant) {
+        final Optional<Tenant> tenantToBeUpdated = tenantRepository.findById(id);
+        return tenantToBeUpdated
+                .map(tenant -> {
+                    updatedTenant.setId(tenant.getId());
+                    return tenantRepository.save(updatedTenant);
+                })
+                .orElseThrow(TenantNotFoundException::new);
+    }
+}
