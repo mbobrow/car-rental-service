@@ -80,14 +80,14 @@ public class RentalService {
 
     private void checkCarsAvailability(final RentalRequest rentalRequest) {
         final Rental requestedRental = rentalRequest.getRental();
-        final List<Car> foundedCars = carRepository.findAllById(
+        final List<Car> foundCars = carRepository.findAllById(
                 requestedRental.getRentedCars().stream()
                         .map(Car::getId)
                         .collect(Collectors.toList())
         );
         requestedRental.getRentedCars()
                 .forEach(requestedCar -> {
-                    if (!foundedCars.contains(requestedCar)) {
+                    if (!foundCars.contains(requestedCar)) {
                         throw new CarNotFoundException(requestedCar.toString()
                                 .concat(". Car-Rental does not own this car.")
                         );
@@ -139,12 +139,16 @@ public class RentalService {
             throw new RentalNotFoundException();
         }
         // Then detach cars from rental
-        final Rental rentalToDelete = optionalRentalToDelete.get();
+        final Rental rentalToDelete = detachCars(optionalRentalToDelete.get());
+        // And delete rental itself
+        rentalRepository.delete(rentalToDelete);
+    }
+
+    private Rental detachCars(final Rental rentalToDelete) {
         for (Car car : new HashSet<>(rentalToDelete.getRentedCars())) {
             car.setRental(null);
         }
-        // And delete rental itself
-        rentalRepository.delete(rentalToDelete);
+        return rentalToDelete;
     }
 
 }
