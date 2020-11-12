@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.capgemini.rentalcars</groupId>
-	<artifactId>rental-cars</artifactId>
+	<artifactId>car-rental</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>rental-cars</name>
+	<name>car-rental</name>
 	<description>Rental Cars</description>
 
 	<properties>
