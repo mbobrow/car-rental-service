@@ -40,18 +40,6 @@ public class RentalService {
         return rentalRepository.findById(rentalId).orElseThrow(RentalNotFoundException::new);
     }
 
-    /**
-     * TODO: consider improvement
-     * - reduce amount of repo calls
-     * - findByTenant from repo, not request
-     * - at first valid request then rental should be created by repos, not request data
-     * <p>
-     * Concept:
-     * - check existence of tenant then cars
-     * - check every requested car is not already rented
-     * - find rental by tenant (for create or update purposes)
-     * - create new rental or update existing one based on data from repo (request let us know what do we want to find in repo for rental purposes)
-     */
     public Rental createOrUpdateRental(final RentalRequest rentalRequest) {
         /*
             Find rental by tenant from provided rental request.
@@ -113,89 +101,6 @@ public class RentalService {
                         .concat(". At first new Tenant has to be registered! ")
                 )
         );
-    }
-
-    // TODO: to be removed
-    private void checkTenantExistence(final Tenant requestedTenant) {
-        final ExampleMatcher tenantMatcher = ExampleMatcher.matching()
-                .withIgnorePaths("rental")
-                .withIgnoreCase();
-        if (!tenantRepository.exists(Example.of(requestedTenant, tenantMatcher))
-                && !tenantRepository.existsById(requestedTenant.getId())) {
-            throw new TenantNotFoundException(requestedTenant.toString()
-                    .concat(". At first new Tenant has to be registered! ")
-            );
-        }
-    }
-
-    // TODO: to be removed
-    private void checkRentalRequest(final RentalRequest rentalRequest) {
-        // Check if tenant from provided rental request already exists in tenant repository
-        checkTenantExistence(rentalRequest.getRental().getTenant());
-        /*
-            Check if cars from provided rental request already exists in cars repository
-            Then check if they are available to rent.
-         */
-        checkCarsExistence(rentalRequest);
-    }
-
-    // TODO: to be removed
-    private void checkCarsExistence(final RentalRequest rentalRequest) {
-        final Set<Car> requestedCars = rentalRequest.getRental().getRentedCars();
-        // Check if rental request contains at least one car
-        if (requestedCars.isEmpty()) {
-            throw new InvalidRentalRequestException("Rental request does not contain any cars. "
-                    .concat("At least one car is needed! ")
-            );
-        }
-        /*
-            Check if car rental owns the cars from provided rental request.
-            Then check car is available to rent.
-         */
-        final ExampleMatcher carMatcher = ExampleMatcher.matching()
-                .withIgnorePaths("rental", "available")
-                .withIgnoreCase();
-        requestedCars.forEach(
-                car -> {
-                    if (carRepository.exists(Example.of(car, carMatcher))
-                            || carRepository.existsById(car.getId())) {
-                        if (!car.isAvailable()) { // TODO: car has to be from repo!
-                            throw new CarAlreadyRentedException(car.toString()
-                                    .concat(" is already rented by Tenant with id:")
-                                    .concat(rentalRequest.getRental().getTenant().getId().toString())
-                            );
-                        }
-                    } else {
-                        throw new CarNotFoundException(car.toString()
-                                .concat(". Car-Rental does not own this car. ")
-                        );
-                    }
-                }
-        );
-    }
-
-    // TODO: to be removed
-    private void checkCarsAvailability(final RentalRequest rentalRequest) {
-        final Rental requestedRental = rentalRequest.getRental();
-        final List<Car> foundCars = carRepository.findAllById(
-                requestedRental.getRentedCars().stream()
-                        .map(Car::getId)
-                        .collect(Collectors.toList())
-        );
-        requestedRental.getRentedCars()
-                .forEach(requestedCar -> {
-                    if (!foundCars.contains(requestedCar)) {
-                        throw new CarNotFoundException(requestedCar.toString()
-                                .concat(". Car-Rental does not own this car. ")
-                        );
-                    }
-                    carRepository.findById(requestedCar.getId())
-                            .filter(Car::isAvailable)
-                            .orElseThrow(() -> new CarAlreadyRentedException(requestedCar.toString()
-                                    .concat(" is already rented by Tenant with id:")
-                                    .concat(requestedRental.getTenant().getId().toString()))
-                            );
-                });
     }
 
     public void cancelRental(final Tenant tenant) {
