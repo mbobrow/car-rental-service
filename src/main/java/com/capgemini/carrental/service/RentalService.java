@@ -1,7 +1,10 @@
 package com.capgemini.carrental.service;
 
 import com.capgemini.carrental.dto.RentalRequest;
-import com.capgemini.carrental.exception.*;
+import com.capgemini.carrental.exception.CarAlreadyRentedException;
+import com.capgemini.carrental.exception.CarNotFoundException;
+import com.capgemini.carrental.exception.RentalNotFoundException;
+import com.capgemini.carrental.exception.TenantNotFoundException;
 import com.capgemini.carrental.model.Car;
 import com.capgemini.carrental.model.Rental;
 import com.capgemini.carrental.model.Tenant;
@@ -9,8 +12,6 @@ import com.capgemini.carrental.repository.CarRepository;
 import com.capgemini.carrental.repository.RentalRepository;
 import com.capgemini.carrental.repository.TenantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,7 +76,7 @@ public class RentalService {
         return savedRental;
     }
 
-    private Collection<Car> findCars(final Set<Car> requestedCars) {
+    private Collection<Car> findCars(final Set<Car> requestedCars) { // TODO: should be findAll(Example<S>)?
         final Collection<Car> foundCars = carRepository.findAllById(requestedCars.stream()
                 .map(Car::getId)
                 .collect(Collectors.toList())
@@ -95,7 +96,7 @@ public class RentalService {
     }
 
     private Tenant findTenant(final Tenant tenant) {
-        final Optional<Tenant> optionalTenant = tenantRepository.findById(tenant.getId());
+        final Optional<Tenant> optionalTenant = tenantRepository.findById(tenant.getId()); // TODO: should be findOne(Example<S>)?
         return optionalTenant.orElseThrow(
                 () -> new TenantNotFoundException(tenant.toString()
                         .concat(". At first new Tenant has to be registered! ")
@@ -112,11 +113,10 @@ public class RentalService {
         detachCars(optionalRentalToDelete.get());
     }
 
-    private Rental detachCars(final Rental rentalToDelete) {
+    private void detachCars(final Rental rentalToDelete) {
         for (Car car : new HashSet<>(rentalToDelete.getRentedCars())) {
             car.setRental(null);
         }
-        return rentalToDelete;
     }
 
 }

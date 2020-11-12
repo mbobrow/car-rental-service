@@ -49,14 +49,13 @@ public class Car {
     @JoinColumn(name = "fk_rental", referencedColumnName = "id")
     private Rental rental;
 
-    @JsonIgnore
-    public boolean isAvailable() {
-        return rental == null || rental.getId() == null;
+    public boolean isRented() {
+        return rental != null && rental.getId() != null;
     }
 
     @JsonIgnore
-    public boolean isRented() {
-        return rental != null && rental.getId() != null;
+    public boolean isAvailable() {
+        return rental == null || rental.getId() == null;
     }
 
     private boolean sameAsCurrent(final Rental newRental) {
