@@ -1,8 +1,8 @@
 package com.capgemini.carrental.service;
 
 import com.capgemini.carrental.exception.CarNotFoundException;
-import com.capgemini.carrental.repository.CarRepository;
 import com.capgemini.carrental.model.Car;
+import com.capgemini.carrental.repository.CarRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,18 +34,18 @@ public class CarService {
     }
 
     public Car removeCar(final Long id) {
-        final Optional<Car> carToBeRemoved = carRepository.findById(id);
-        return carToBeRemoved
+        final Optional<Car> carToRemove = carRepository.findById(id);
+        return carToRemove
                 .map(car -> {
                     carRepository.deleteById(id);
-                    return carToBeRemoved.get();
+                    return carToRemove.get();
                 })
                 .orElseThrow(CarNotFoundException::new);
     }
 
     public Car updateCar(final Long id, final Car updatedCar) {
-        final Optional<Car> carToBeUpdated = carRepository.findById(id);
-        return carToBeUpdated
+        final Optional<Car> carToUpdate = carRepository.findById(id);
+        return carToUpdate
                 .map(car -> {
                     updatedCar.setId(car.getId());
                     return carRepository.save(updatedCar);

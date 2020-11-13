@@ -34,17 +34,17 @@ public class TenantService {
     }
 
     public Tenant removeTenant(final Long id) {
-        final Optional<Tenant> tenantToBeRemoved = tenantRepository.findById(id);
-        if (!tenantToBeRemoved.isPresent()) {
+        final Optional<Tenant> tenantToRemove = tenantRepository.findById(id);
+        if (!tenantToRemove.isPresent()) {
             throw new TenantNotFoundException();
         }
         tenantRepository.deleteById(id);
-        return tenantToBeRemoved.get();
+        return tenantToRemove.get();
     }
 
     public Tenant updateTenant(final Long id, final Tenant updatedTenant) {
-        final Optional<Tenant> tenantToBeUpdated = tenantRepository.findById(id);
-        return tenantToBeUpdated
+        final Optional<Tenant> tenantToUpdate = tenantRepository.findById(id);
+        return tenantToUpdate
                 .map(tenant -> {
                     updatedTenant.setId(tenant.getId());
                     return tenantRepository.save(updatedTenant);

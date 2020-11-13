@@ -95,5 +95,19 @@ public class Rental {
         }
     }
 
+    public void detachAllCars() {
+        for (Car carToDetach : new HashSet<>(this.rentedCars)) {
+            carToDetach.setRental(null);
+        }
+        this.rentedCars.clear();
+    }
+
+    public void detachCars(final Collection<Car> carsToDetach) {
+        for (Car carToDetach : new HashSet<>(carsToDetach)) {
+            if (this.rentedCars.remove(carToDetach)) {
+                carToDetach.setRental(null);
+            }
+        }
+    }
 }
 

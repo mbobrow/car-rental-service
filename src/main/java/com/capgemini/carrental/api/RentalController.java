@@ -1,5 +1,6 @@
 package com.capgemini.carrental.api;
 
+import com.capgemini.carrental.dto.CancelRentalCarsRequest;
 import com.capgemini.carrental.dto.RentalRequest;
 import com.capgemini.carrental.model.Rental;
 import com.capgemini.carrental.model.Tenant;
@@ -36,10 +37,18 @@ public class RentalController {
         return this.rentalService.createOrUpdateRental(rentalRequest);
     }
 
+    @DeleteMapping(path = "/{rentalId}")
+    public void cancelRental(@PathVariable final Long rentalId) {
+        this.rentalService.cancelRental(rentalId);
+    }
+
     @DeleteMapping
     public void cancelRental(@RequestBody final Tenant tenant) {
         this.rentalService.cancelRental(tenant);
     }
 
-    // TODO: create @DeleteMapping cancelRental(Tenant, Set<Car>)
+    @PatchMapping
+    public Rental cancelRentedCars(@Valid @RequestBody final CancelRentalCarsRequest cancelRentalCarsRequest) {
+        return this.rentalService.cancelRentedCars(cancelRentalCarsRequest);
+    }
 }
