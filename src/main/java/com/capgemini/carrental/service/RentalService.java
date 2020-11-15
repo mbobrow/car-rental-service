@@ -44,6 +44,16 @@ public class RentalService {
                 .orElseThrow(RentalNotFoundException::new);
     }
 
+    public Rental getRental(final Tenant tenant) {
+        return rentalRepository.findByTenant(tenant)
+                .orElseThrow(RentalNotFoundException::new);
+    }
+
+    public Rental getRental(final Car car) {
+        return rentalRepository.findByCar(car)
+                .orElseThrow(RentalNotFoundException::new);
+    }
+
     public Rental createOrUpdateRental(final RentalRequest rentalRequest) {
         /*
             Find rental by tenant from provided rental request.

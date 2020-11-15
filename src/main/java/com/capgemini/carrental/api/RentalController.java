@@ -2,6 +2,7 @@ package com.capgemini.carrental.api;
 
 import com.capgemini.carrental.dto.CancelRentalCarsRequest;
 import com.capgemini.carrental.dto.RentalRequest;
+import com.capgemini.carrental.model.Car;
 import com.capgemini.carrental.model.Rental;
 import com.capgemini.carrental.model.Tenant;
 import com.capgemini.carrental.service.RentalService;
@@ -32,6 +33,16 @@ public class RentalController {
         return this.rentalService.getRental(id);
     }
 
+    @GetMapping(path = "/tenant")
+    public Rental getRentalByTenant(@RequestBody final Tenant tenant) {
+        return this.rentalService.getRental(tenant);
+    }
+
+    @GetMapping(path = "/car")
+    public Rental getRentalByCar(@RequestBody final Car car) {
+        return this.rentalService.getRental(car);
+    }
+
     @PostMapping
     public Rental rentACar(@Valid @RequestBody final RentalRequest rentalRequest) {
         return this.rentalService.createOrUpdateRental(rentalRequest);
@@ -51,4 +62,5 @@ public class RentalController {
     public Rental cancelRentedCars(@Valid @RequestBody final CancelRentalCarsRequest cancelRentalCarsRequest) {
         return this.rentalService.cancelRentedCars(cancelRentalCarsRequest);
     }
+
 }
