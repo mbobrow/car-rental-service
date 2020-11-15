@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RequestMapping("api/v1/car")
 @RestController
@@ -20,8 +21,13 @@ public class CarController {
     }
 
     @GetMapping
-    public List<Car> getAllCars() {
-        return this.carService.getAllCars();
+    public List<Car> getAllCars(@RequestParam final Optional<Boolean> available) {
+        return available
+                .map(availableValue -> {
+                    if (availableValue) return this.carService.getAllAvailableCars();
+                    else return this.carService.getAllRentalCars();
+                })
+                .orElse(this.carService.getAllCars());
     }
 
     @PostMapping
@@ -44,5 +50,4 @@ public class CarController {
         return this.carService.updateCar(id, updatedCar);
     }
 
-    // TODO: should create isAvailableCar end-point?
 }

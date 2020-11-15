@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -23,6 +24,18 @@ public class CarService {
 
     public List<Car> getAllCars() {
         return carRepository.findAll();
+    }
+
+    public List<Car> getAllAvailableCars() {
+        return carRepository.findAll().stream()
+                .filter(Car::isAvailable)
+                .collect(Collectors.toList());
+    }
+
+    public List<Car> getAllRentalCars() {
+        return carRepository.findAll().stream()
+                .filter(Car::isRented)
+                .collect(Collectors.toList());
     }
 
     public Car addCar(final Car newCar) {
