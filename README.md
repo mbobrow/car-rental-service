@@ -2,10 +2,13 @@
 The Spring Boot REST micro-service with in-memory H2 data base to simulate car rental.
 
 ## Swagger
-Below you can find the Swagger documentation.  
+Here you can find the Swagger documentation.  
 Example URL with Swagger UI: http://localhost:8080/swagger-ui/#/
 
 # H2 Data Base
+Here you can find H2 console.  
+Example URL: http://localhost:8080/h2-console/
+
 ## Entities
 * Car - has many to one relation with _Rental_
 * Tenant - has one to one relation with _Rental_
