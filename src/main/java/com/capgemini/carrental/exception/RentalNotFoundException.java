@@ -1,6 +1,7 @@
 package com.capgemini.carrental.exception;
 
 public class RentalNotFoundException extends RuntimeException {
+
     public RentalNotFoundException() {
     }
 

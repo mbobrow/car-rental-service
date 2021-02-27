@@ -1,23 +1,21 @@
 package com.capgemini.carrental.service;
 
+import java.util.List;
+import java.util.Optional;
+
 import com.capgemini.carrental.exception.TenantNotFoundException;
 import com.capgemini.carrental.model.Tenant;
 import com.capgemini.carrental.repository.TenantRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-
-@Service
-@Transactional
-public class TenantService {
+@Service @Transactional public class TenantService {
 
     private final TenantRepository tenantRepository;
 
-    @Autowired
-    public TenantService(final TenantRepository tenantRepository) {
+    @Autowired public TenantService(final TenantRepository tenantRepository) {
         this.tenantRepository = tenantRepository;
     }
 
@@ -44,11 +42,9 @@ public class TenantService {
 
     public Tenant updateTenant(final Long id, final Tenant updatedTenant) {
         final Optional<Tenant> tenantToUpdate = tenantRepository.findById(id);
-        return tenantToUpdate
-                .map(tenant -> {
-                    updatedTenant.setId(tenant.getId());
-                    return tenantRepository.save(updatedTenant);
-                })
-                .orElseThrow(TenantNotFoundException::new);
+        return tenantToUpdate.map(tenant -> {
+            updatedTenant.setId(tenant.getId());
+            return tenantRepository.save(updatedTenant);
+        }).orElseThrow(TenantNotFoundException::new);
     }
 }

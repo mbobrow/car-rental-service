@@ -1,38 +1,31 @@
 package com.capgemini.carrental.service;
 
-import com.capgemini.carrental.dto.CancelRentalCarsRequest;
-import com.capgemini.carrental.dto.RentalRequest;
-import com.capgemini.carrental.exception.CarAlreadyRentedException;
-import com.capgemini.carrental.exception.CarNotFoundException;
+import java.util.List;
+import java.util.Optional;
+
+import com.capgemini.carrental.dto.request.CancelRentalCarsRequest;
+import com.capgemini.carrental.dto.request.RentalRequest;
 import com.capgemini.carrental.exception.RentalNotFoundException;
-import com.capgemini.carrental.exception.TenantNotFoundException;
 import com.capgemini.carrental.model.Car;
 import com.capgemini.carrental.model.Rental;
 import com.capgemini.carrental.model.Tenant;
-import com.capgemini.carrental.repository.CarRepository;
 import com.capgemini.carrental.repository.RentalRepository;
-import com.capgemini.carrental.repository.TenantRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
-@Service
-@Transactional
-public class RentalService {
+@Service @Transactional public class RentalService {
 
     private final RentalRepository rentalRepository;
-    private final TenantRepository tenantRepository;
-    private final CarRepository carRepository;
+    private final TenantService tenantService;
+    private final CarService carService;
 
-    @Autowired
-    public RentalService(final RentalRepository rentalRepository, final TenantRepository tenantRepository, final CarRepository carRepository) {
+    @Autowired public RentalService(
+            final RentalRepository rentalRepository, final TenantService tenantService, final CarService carService) {
         this.rentalRepository = rentalRepository;
-        this.tenantRepository = tenantRepository;
-        this.carRepository = carRepository;
+        this.tenantService = tenantService;
+        this.carService = carService;
     }
 
     public List<Rental> getAllRentals() {
@@ -40,100 +33,55 @@ public class RentalService {
     }
 
     public Rental getRental(final Long rentalId) {
-        return rentalRepository.findById(rentalId)
-                .orElseThrow(RentalNotFoundException::new);
+        return rentalRepository.findById(rentalId).orElseThrow(RentalNotFoundException::new);
     }
 
-    public Rental getRental(final Tenant tenant) {
-        return rentalRepository.findByTenant(tenant)
-                .orElseThrow(RentalNotFoundException::new);
+    public Rental getRentalByTenantId(final Long tenantId) {
+        final Tenant tenant = tenantService.getTenant(tenantId);
+        return rentalRepository.findByTenant(tenant).orElseThrow(RentalNotFoundException::new);
     }
 
-    public Rental getRental(final Car car) {
-        return rentalRepository.findByCar(car)
-                .orElseThrow(RentalNotFoundException::new);
+    public Rental getRentalByCarId(final Long carId) {
+        final Car car = carService.getCar(carId);
+        return rentalRepository.findByCar(car).orElseThrow(RentalNotFoundException::new);
     }
 
-    public Rental createOrUpdateRental(final RentalRequest rentalRequest) {
+    public Rental createRental(final RentalRequest rentalRequest) {
+        // create new Rental entity
+        final Rental newRentalEntity = new Rental();
+        newRentalEntity.setTenant(tenantService.getTenant(rentalRequest.getTenantId()));
+        newRentalEntity.addCars(carService.getOnlyAvailableCarsById(rentalRequest.getCarIds()));
+        newRentalEntity.setBeginningOfRental(rentalRequest.getBeginningOfRental());
+        newRentalEntity.setEndOfRental(rentalRequest.getEndOfRental());
+        return rentalRepository.save(newRentalEntity);
+    }
+
+    public Rental updateRental(final RentalRequest rentalRequest) {
+        final Tenant tenant = tenantService.getTenant(rentalRequest.getTenantId());
+        final Optional<Rental> rentalToUpdate = rentalRepository.findByTenant(tenant);
+        return rentalToUpdate.map(rental -> {
+            rental.setTenant(tenant);
+            rental.addCars(carService.getOnlyAvailableCarsById(rentalRequest.getCarIds()));
+            rental.setBeginningOfRental(rentalRequest.getBeginningOfRental());
+            rental.setEndOfRental(rentalRequest.getEndOfRental());
+            return rentalRepository.save(rental);
+        }).orElseThrow(RentalNotFoundException::new);
+    }
+
+    public void cancelRentalById(final Long rentalId) {
         /*
-            Find rental by tenant from provided rental request.
-            If rental is found it is updated otherwise the new one is created.
+            Find a rental to delete
+            And detach all cars of it
          */
-        return rentalRepository.findByTenant(rentalRequest.getRental().getTenant())
-                .map(rental -> updateRental(rental, rentalRequest))
-                .orElseGet(() -> createRental(rentalRequest));
-    }
-
-    private Rental updateRental(final Rental rentalToUpdate, final RentalRequest rentalRequest) {
-        final Rental requestedRental = rentalRequest.getRental();
-        rentalToUpdate.addCars(findAvailableCars(requestedRental.getRentedCars()));
-        rentalToUpdate.setBeginningOfRental(requestedRental.getBeginningOfRental());
-        rentalToUpdate.setEndOfRental(requestedRental.getEndOfRental());
-        // update car repo as well
-        carRepository.saveAll(rentalToUpdate.getRentedCars());
-        return rentalRepository.save(rentalToUpdate);
-    }
-
-    private Rental createRental(final RentalRequest rentalRequest) {
-        final Rental requestedRental = rentalRequest.getRental();
-        // then create new Rental
-        final Rental newRental = new Rental();
-        newRental.setTenant(findTenant(requestedRental.getTenant()));
-        newRental.addCars(findAvailableCars(requestedRental.getRentedCars()));
-        newRental.setBeginningOfRental(requestedRental.getBeginningOfRental());
-        newRental.setEndOfRental(requestedRental.getEndOfRental());
-        final Rental savedRental = rentalRepository.save(newRental);
-        // update car repo as well
-        carRepository.saveAll(savedRental.getRentedCars());
-        return savedRental;
-    }
-
-    private Collection<Car> findCars(final Collection<Car> carsToFind) {
-        final Collection<Car> foundCars = carRepository.findAllById(carsToFind.stream()
-                .map(Car::getId)
-                .collect(Collectors.toList())
-        );
-        if (foundCars.isEmpty()) {
-            throw new CarNotFoundException("Requested cars are not found in the Car-Rental");
-        }
-        return foundCars;
-    }
-
-    private Collection<Car> findAvailableCars(final Collection<Car> requestedCars) { // TODO: should be findAll(Example<S>)?
-        final Collection<Car> foundCars = findCars(requestedCars);
-        foundCars.forEach(car -> {
-            if (car.isRented()) {
-                throw new CarAlreadyRentedException(car.toString()
-                        .concat(" is already rented by Tenant with id:")
-                        .concat(car.getRental().getTenant().getId().toString())
-                );
-            }
-        });
-        return foundCars;
-    }
-
-    private Tenant findTenant(final Tenant tenant) {
-        // TODO: should be findOne(Example<S>)?
-        return tenantRepository.findById(tenant.getId())
-                .orElseThrow(() ->
-                        new TenantNotFoundException(tenant.toString()
-                                .concat(". At first new Tenant has to be registered! ")
-                        )
-                );
-    }
-
-    public void cancelRental(final Long rentalId) {
-        rentalRepository.findById(rentalId)
-                .orElseThrow(RentalNotFoundException::new)
-                .detachAllCars();
+        rentalRepository.findById(rentalId).orElseThrow(RentalNotFoundException::new).detachAllCars();
         rentalRepository.deleteById(rentalId);
     }
 
-    public void cancelRental(final Tenant tenant) {
+    public void cancelRentalByTenantId(final Long tenantId) {
         // Find a rental to delete
-        final Rental rentalToCancellation = rentalRepository.findByTenant(tenant)
-                .orElseThrow(RentalNotFoundException::new);
-        // Then detach all cars of found rental
+        final Tenant tenant = tenantService.getTenant(tenantId);
+        final Rental rentalToCancellation = rentalRepository.findByTenant(tenant).orElseThrow(RentalNotFoundException::new);
+        // And detach all cars of it
         rentalToCancellation.detachAllCars();
         // Delete the rental itself
         rentalRepository.delete(rentalToCancellation);
@@ -141,10 +89,10 @@ public class RentalService {
 
     public Rental cancelRentedCars(final CancelRentalCarsRequest cancelRentalCarsRequest) {
         // Find rental to modify rented cars
-        final Rental rentalToModify = rentalRepository.findByTenant(cancelRentalCarsRequest.getTenant())
-                .orElseThrow(RentalNotFoundException::new);
+        final Tenant tenant = tenantService.getTenant(cancelRentalCarsRequest.getTenantId());
+        final Rental rentalToModify = rentalRepository.findByTenant(tenant).orElseThrow(RentalNotFoundException::new);
         // Then detach all cars from cancellation request of found rental
-        rentalToModify.detachCars(findCars(cancelRentalCarsRequest.getCars()));
+        rentalToModify.detachCars(carService.getCarsById(cancelRentalCarsRequest.getCarIds()));
         // Save the modified rental
         return rentalRepository.save(rentalToModify);
     }

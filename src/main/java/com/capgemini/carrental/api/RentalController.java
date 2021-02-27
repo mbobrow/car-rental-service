@@ -1,66 +1,87 @@
 package com.capgemini.carrental.api;
 
-import com.capgemini.carrental.dto.CancelRentalCarsRequest;
-import com.capgemini.carrental.dto.RentalRequest;
-import com.capgemini.carrental.model.Car;
-import com.capgemini.carrental.model.Rental;
-import com.capgemini.carrental.model.Tenant;
-import com.capgemini.carrental.service.RentalService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
-import java.util.List;
 
-@RequestMapping("api/v1/rental")
-@RestController
-public class RentalController {
+import com.capgemini.carrental.dto.request.CancelRentalCarsRequest;
+import com.capgemini.carrental.dto.request.RentalRequest;
+import com.capgemini.carrental.dto.response.RentalResponse;
+import com.capgemini.carrental.mapper.RentalEntityToResponseMapper;
+import com.capgemini.carrental.model.Rental;
+import com.capgemini.carrental.service.RentalService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+@RequestMapping("api/v1/rental") @RestController public class RentalController {
 
     private final RentalService rentalService;
+    private final RentalEntityToResponseMapper rentalResponseMapper;
 
-    @Autowired
-    public RentalController(final RentalService rentalService) {
+    @Autowired public RentalController(
+            final RentalService rentalService, final RentalEntityToResponseMapper rentalResponseMapper) {
         this.rentalService = rentalService;
+        this.rentalResponseMapper = rentalResponseMapper;
     }
 
-    @GetMapping
-    public List<Rental> getAllRentals() {
-        return this.rentalService.getAllRentals();
+    @GetMapping(path = "/search") @ResponseBody public List<RentalResponse> getAllRentals() {
+        return rentalService.getAllRentals().stream().map(rentalResponseMapper::mapToResponse).collect(Collectors.toList());
     }
 
-    @GetMapping(path = "{id}")
-    public Rental getRental(@PathVariable("id") final Long id) {
-        return this.rentalService.getRental(id);
+    @GetMapping(path = "/search/{id}") @ResponseBody public RentalResponse getRental(@PathVariable("id") final Long id) {
+        final Rental rental = rentalService.getRental(id);
+        return rentalResponseMapper.mapToResponse(rental);
     }
 
-    @GetMapping(path = "/tenant")
-    public Rental getRentalByTenant(@RequestBody final Tenant tenant) {
-        return this.rentalService.getRental(tenant);
+    @GetMapping(path = "/search/byTenant/{tenantId}") @ResponseBody
+    public RentalResponse getRentalByTenant(@PathVariable("tenantId") final Long tenantId) {
+        final Rental rental = rentalService.getRentalByTenantId(tenantId);
+        return rentalResponseMapper.mapToResponse(rental);
     }
 
-    @GetMapping(path = "/car")
-    public Rental getRentalByCar(@RequestBody final Car car) {
-        return this.rentalService.getRental(car);
+    @GetMapping(path = "/search/byCar/{carId}") @ResponseBody
+    public RentalResponse getRentalByCar(@PathVariable("carId") final Long carId) {
+        final Rental rental = rentalService.getRentalByCarId(carId);
+        return rentalResponseMapper.mapToResponse(rental);
     }
 
-    @PostMapping
-    public Rental rentACar(@Valid @RequestBody final RentalRequest rentalRequest) {
-        return this.rentalService.createOrUpdateRental(rentalRequest);
+    @PostMapping @ResponseBody @ResponseStatus(HttpStatus.CREATED)
+    public RentalResponse rentACar(@Valid @RequestBody final RentalRequest rentalRequest) {
+        final Rental newRental = rentalService.createRental(rentalRequest);
+        return rentalResponseMapper.mapToResponse(newRental);
     }
 
-    @DeleteMapping(path = "/{rentalId}")
-    public void cancelRental(@PathVariable final Long rentalId) {
-        this.rentalService.cancelRental(rentalId);
+    @PutMapping @ResponseBody public RentalResponse updateRental(
+            @Valid @RequestBody final RentalRequest rentalToUpdateRequest) {
+        final Rental updatedRental = rentalService.updateRental(rentalToUpdateRequest);
+        return rentalResponseMapper.mapToResponse(updatedRental);
     }
 
-    @DeleteMapping
-    public void cancelRental(@RequestBody final Tenant tenant) {
-        this.rentalService.cancelRental(tenant);
+    @DeleteMapping(path = "/remove/{rentalId}") public void cancelRental(@PathVariable("rentalId") final Long rentalId) {
+        rentalService.cancelRentalById(rentalId);
     }
 
-    @PatchMapping
-    public Rental cancelRentedCars(@Valid @RequestBody final CancelRentalCarsRequest cancelRentalCarsRequest) {
-        return this.rentalService.cancelRentedCars(cancelRentalCarsRequest);
+    @DeleteMapping(path = "/remove/byTenant/{tenantId}")
+    public void cancelRentalByTenantId(@PathVariable("tenantId") final Long tenantId) {
+        rentalService.cancelRentalByTenantId(tenantId);
     }
 
+    @PatchMapping @ResponseBody
+    public RentalResponse cancelRentedCars(@Valid @RequestBody final CancelRentalCarsRequest cancelRentalCarsRequest) {
+        final Rental rentalAfterCancellation = rentalService.cancelRentedCars(cancelRentalCarsRequest);
+        return rentalResponseMapper.mapToResponse(rentalAfterCancellation);
+    }
 }

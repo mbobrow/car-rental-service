@@ -1,37 +1,32 @@
 package com.capgemini.carrental.model;
 
+import java.util.Objects;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Positive;
-import java.util.Objects;
+@Entity @Table(name = "TENANTS") @Data @NoArgsConstructor public class Tenant {
 
-@Entity
-@Table(name = "TENANTS")
-@Data
-@NoArgsConstructor
-public class Tenant {
+    @Id @GeneratedValue private Long id;
 
-    @Id
-    @GeneratedValue
-    private Long id;
-
-    @NotBlank
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
+    @Enumerated(EnumType.STRING) private Gender gender;
 
-    @Positive
-    private int age;
+    private Integer age;
 
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @OneToOne(mappedBy = "tenant", cascade = CascadeType.ALL)
+    @ToString.Exclude @EqualsAndHashCode.Exclude @OneToOne(mappedBy = "tenant", cascade = CascadeType.ALL)
     private Rental rental;
 
     private boolean sameAsCurrent(final Rental newRental) {

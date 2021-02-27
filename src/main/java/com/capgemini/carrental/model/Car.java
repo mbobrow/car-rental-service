@@ -1,59 +1,44 @@
 package com.capgemini.carrental.model;
 
-import com.fasterxml.jackson.annotation.*;
+import java.util.Objects;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import java.util.Objects;
+@Entity @Table(name = "CARS") @Data @NoArgsConstructor public class Car {
 
-@Entity
-@Table(name = "CARS")
-@Data
-@NoArgsConstructor
-@JsonIdentityInfo(
-        generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "id",
-        scope = Long.class
-)
-public class Car {
+    @Id @GeneratedValue private Long id;
 
-    @Id
-    @GeneratedValue
-    private Long id;
-
-    @NotBlank
     private String brand;
 
-    @NotBlank
     private String model;
 
-    @Column(name = "BODY_TYPE")
-    @Enumerated(EnumType.STRING)
-    private BodyType bodyType;
+    @Column(name = "BODY_TYPE") @Enumerated(EnumType.STRING) private BodyType bodyType;
 
-    @Column(name = "FUEL_TYPE")
-    @Enumerated(EnumType.STRING)
-    private FuelType fuelType;
+    @Column(name = "FUEL_TYPE") @Enumerated(EnumType.STRING) private FuelType fuelType;
 
-    private int year;
+    private Integer year;
 
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @JsonBackReference
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    @ManyToOne(targetEntity = Rental.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_rental", referencedColumnName = "id")
-    private Rental rental;
+    @ToString.Exclude @EqualsAndHashCode.Exclude @ManyToOne(targetEntity = Rental.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "fk_rental", referencedColumnName = "id") private Rental rental;
 
     public boolean isRented() {
         return rental != null && rental.getId() != null;
     }
 
-    @JsonIgnore
     public boolean isAvailable() {
         return rental == null || rental.getId() == null;
     }

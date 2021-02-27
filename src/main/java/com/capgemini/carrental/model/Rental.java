@@ -1,42 +1,30 @@
 package com.capgemini.carrental.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Entity
-@Table(name = "RENTALS")
-@Data
-@NoArgsConstructor
-@JsonIdentityInfo(
-        generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "id",
-        scope = Long.class
-)
-public class Rental {
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
-    @Id
-    @GeneratedValue
-    private Long id;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_tenant", referencedColumnName = "id")
-    private Tenant tenant;
+@Entity @Table(name = "RENTALS") @Data @NoArgsConstructor public class Rental {
 
-    @JsonManagedReference
-    @OneToMany(targetEntity = Car.class, mappedBy = "rental")
-    private Set<Car> rentedCars = new HashSet<>();
+    @Id @GeneratedValue private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY) @JoinColumn(name = "fk_tenant", referencedColumnName = "id") private Tenant tenant;
+
+    @OneToMany(targetEntity = Car.class, mappedBy = "rental") private Set<Car> rentedCars = new HashSet<>();
 
     private LocalDate beginningOfRental;
     private LocalDate endOfRental;
