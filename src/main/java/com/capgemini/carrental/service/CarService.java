@@ -63,7 +63,7 @@ import org.springframework.transaction.annotation.Transactional;
                 .filter(Car::isAvailable)
                 .collect(Collectors.toList());
         if (availableCars.isEmpty()) {
-            throw new CarAlreadyRentedException("Provided cars are not available!");
+            throw new CarAlreadyRentedException("Provided cars are already rented!");
         }
         return availableCars;
     }

@@ -59,14 +59,14 @@ import org.springframework.web.bind.annotation.RestController;
     }
 
     @PostMapping @ResponseBody @ResponseStatus(HttpStatus.CREATED)
-    public RentalResponse rentACar(@Valid @RequestBody final RentalRequest rentalRequest) {
+    public RentalResponse createNewRental(@Valid @RequestBody final RentalRequest rentalRequest) {
         final Rental newRental = rentalService.createRental(rentalRequest);
         return rentalResponseMapper.mapToResponse(newRental);
     }
 
-    @PutMapping @ResponseBody public RentalResponse updateRental(
-            @Valid @RequestBody final RentalRequest rentalToUpdateRequest) {
-        final Rental updatedRental = rentalService.updateRental(rentalToUpdateRequest);
+    @PutMapping @ResponseBody public RentalResponse addCarsToExistingRental(
+            @Valid @RequestBody final RentalRequest updateRequest) {
+        final Rental updatedRental = rentalService.updateRental(updateRequest);
         return rentalResponseMapper.mapToResponse(updatedRental);
     }
 

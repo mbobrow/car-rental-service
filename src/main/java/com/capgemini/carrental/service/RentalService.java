@@ -1,5 +1,6 @@
 package com.capgemini.carrental.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,9 +48,15 @@ import org.springframework.transaction.annotation.Transactional;
     }
 
     public Rental createRental(final RentalRequest rentalRequest) {
-        // create new Rental entity
+        // check requested Rental already exists
+        final Tenant tenant = tenantService.getTenant(rentalRequest.getTenantId());
+        rentalRepository.findByTenant(tenant).ifPresent(rental -> {
+            rental.detachAllCars();
+            rentalRepository.delete(rental);
+        });
+        // then create new Rental entity
         final Rental newRentalEntity = new Rental();
-        newRentalEntity.setTenant(tenantService.getTenant(rentalRequest.getTenantId()));
+        newRentalEntity.setTenant(tenant);
         newRentalEntity.addCars(carService.getOnlyAvailableCarsById(rentalRequest.getCarIds()));
         newRentalEntity.setBeginningOfRental(rentalRequest.getBeginningOfRental());
         newRentalEntity.setEndOfRental(rentalRequest.getEndOfRental());
@@ -95,6 +102,14 @@ import org.springframework.transaction.annotation.Transactional;
         rentalToModify.detachCars(carService.getCarsById(cancelRentalCarsRequest.getCarIds()));
         // Save the modified rental
         return rentalRepository.save(rentalToModify);
+    }
+
+    private LocalDate getEarlierDate(final LocalDate current, final LocalDate requested) {
+        return current.isBefore(requested) ? current : requested;
+    }
+
+    private LocalDate getLaterDate(final LocalDate current, final LocalDate requested) {
+        return current.isAfter(requested) ? current : requested;
     }
 
 }
