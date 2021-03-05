@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
         this.carResponseMapper = carResponseMapper;
     }
 
-    @GetMapping public List<CarResponse> getAllCars(@RequestParam final Optional<Boolean> available) {
+    @GetMapping public List<CarResponse> getAllCars(@RequestParam(required = false) final Optional<Boolean> available) {
         return available.map(availableValue -> {
             if (Boolean.TRUE.equals(availableValue)) {
                 return carService.getAllAvailableCars()
