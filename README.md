@@ -1,5 +1,5 @@
 # Car Rental
-The Spring Boot REST micro-service with in-memory H2 data base to simulate car rental.
+The Spring Boot REST micro-service with in-memory H2 data base to simulate simplified car rental.
 
 ## Swagger
 Here you can find the Swagger documentation.  
