@@ -1,5 +1,6 @@
 package com.capgemini.demo.carrental.stepdefs;
 
+import com.capgemini.demo.carrental.config.StepDefsConfig;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.junit.Assert;
 import org.slf4j.Logger;
@@ -8,9 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ContextConfiguration;
 
-@SpringBootTest
 @CucumberContextConfiguration
+@SpringBootTest
+@ContextConfiguration(classes = {StepDefsConfig.class})
 public class StepDefsImplementation {
 
     private String serviceAddress = "http://localhost:8080/api/v1/car/";
@@ -25,7 +28,7 @@ public class StepDefsImplementation {
     @Autowired
     private CommonUtility commonUtility = new CommonUtility();
 
-//    @Given("^the REST service with initial car data id \"([^\"]*)\" is available and the \"([^\"]*)\" method is supported$")
+//    @Given("the REST service with initial car data id {string} is available and the {string} method is supported")
     public void the_REST_service_with_initial_car_data_id_is_available_and_the_method_is_supported(String id, String httpMethod) {
         requestType = HttpMethod.valueOf(httpMethod);
         requestUrl = serviceAddress.concat(id);
