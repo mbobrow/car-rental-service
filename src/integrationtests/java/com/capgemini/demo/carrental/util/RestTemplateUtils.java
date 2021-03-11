@@ -1,25 +1,35 @@
-package com.capgemini.demo.carrental.stepdefs;
+package com.capgemini.demo.carrental.util;
 
-import org.springframework.http.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 @Component
-public class CommonUtility {
+public class RestTemplateUtils {
+
+    private final RestTemplate restTemplate;
 
     private String errorResponseStatusCode;
     private String errorResponseBody;
 
-    private RestTemplate restTemplate = new RestTemplate();
+    @Autowired
+    public RestTemplateUtils(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     private void interceptErrorResponse(HttpStatusCodeException e) {
         errorResponseStatusCode = e.getStatusCode().toString().replaceAll("\\D+", "");
         errorResponseBody = e.getResponseBodyAsString();
     }
 
-    public ResponseEntity<String> processHttpRequest(HttpMethod httpMethod, String request, String requestUrl, String contentType) {
-        HttpEntity<String> entity = createRequestEntity(request, contentType);
+    public ResponseEntity<String> processHttpRequest(HttpMethod httpMethod, String requestBody, String requestUrl, String contentType) {
+        HttpEntity<String> entity = createRequestEntity(requestBody, contentType);
         try {
             return restTemplate.exchange(requestUrl, httpMethod, entity, String.class);
         } catch (HttpStatusCodeException e) {
@@ -28,11 +38,10 @@ public class CommonUtility {
         return null;
     }
 
-    private HttpEntity<String> createRequestEntity(String request, String contentType) {
+    private HttpEntity<String> createRequestEntity(String requestBody, String contentType) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.valueOf(contentType));
-        HttpEntity<String> entity = new HttpEntity<>(request, httpHeaders);
-        return entity;
+        return new HttpEntity<>(requestBody, httpHeaders);
     }
 
     public String getErrorResponseStatusCode() {

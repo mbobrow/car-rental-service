@@ -1,10 +1,18 @@
 package com.capgemini.demo.carrental.stepdefs;
 
-import com.capgemini.demo.carrental.config.StepDefsConfig;
+import static com.capgemini.demo.carrental.util.ConstantUtils.API_V1;
+import static com.capgemini.demo.carrental.util.ConstantUtils.CAR_SERVICE_ENDPOINT;
+import static com.capgemini.demo.carrental.util.ConstantUtils.LOCAL_HOST;
+import static com.capgemini.demo.carrental.util.ConstantUtils.LOCAL_HOST_PORT;
+
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
+
+import com.capgemini.demo.carrental.config.StepDefsConfig;
+import com.capgemini.demo.carrental.util.RestTemplateUtils;
+
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,28 +27,31 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = {StepDefsConfig.class})
 public class StepDefsImplementation {
 
-    private String serviceAddress = "http://localhost:8080/api/v1/car/";
+    private static final Logger LOGGER = LoggerFactory.getLogger(StepDefsImplementation.class);
+    private static final String CAR_SERVICE_ADDRESS = LOCAL_HOST
+            .concat(LOCAL_HOST_PORT)
+            .concat(API_V1)
+            .concat(CAR_SERVICE_ENDPOINT);
+
     private HttpMethod requestType;
-    private String requestAsString;
+    private String requestBody;
     private String requestUrl;
     private String responseStatusCode;
     private String responseBody;
 
-    Logger log = LoggerFactory.getLogger(StepDefsImplementation.class);
-
     @Autowired
-    private CommonUtility commonUtility;
+    private RestTemplateUtils restTemplateUtils;
 
     @Given("the REST service with initial car data id {string} is available and the {string} method is supported")
     public void the_rest_service_with_initial_car_data_id_is_available_and_the_method_is_supported(String id, String httpMethod) {
         requestType = HttpMethod.valueOf(httpMethod);
-        requestUrl = serviceAddress.concat(id);
-        requestAsString = "";
+        requestUrl = CAR_SERVICE_ADDRESS.concat("/").concat(id);
+        requestBody = "";
     }
 
     @When("I send request with content type {string} to the service")
     public void i_send_request_with_content_type_to_the_service(String contentType) {
-        ResponseEntity<String> response = commonUtility.processHttpRequest(requestType, requestAsString, requestUrl, contentType);
+        ResponseEntity<String> response = restTemplateUtils.processHttpRequest(requestType, requestBody, requestUrl, contentType);
         retrieveResponseBodyAndStatusCode(response);
     }
 
@@ -53,14 +64,13 @@ public class StepDefsImplementation {
 
     private void retrieveResponseBodyAndStatusCode(ResponseEntity<String> response) {
         if (response != null) {
-            int responseStatusCodeNumber = response.getStatusCodeValue();
-            responseStatusCode = "" + responseStatusCodeNumber;
+            final int responseStatusCodeNumber = response.getStatusCodeValue();
+            responseStatusCode = String.valueOf(responseStatusCodeNumber);
             responseBody = response.getBody();
-            log.info("Status code: " + responseStatusCode);
         } else {
-            responseStatusCode = commonUtility.getErrorResponseStatusCode();
-            responseBody = commonUtility.getErrorResponseBody();
-            log.info("Status code: " + responseStatusCode);
+            responseStatusCode = restTemplateUtils.getErrorResponseStatusCode();
+            responseBody = restTemplateUtils.getErrorResponseBody();
         }
+        LOGGER.info("Status code: {}", responseStatusCode);
     }
 }
