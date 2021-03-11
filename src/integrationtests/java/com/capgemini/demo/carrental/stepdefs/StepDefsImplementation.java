@@ -29,7 +29,7 @@ public class StepDefsImplementation {
     Logger log = LoggerFactory.getLogger(StepDefsImplementation.class);
 
     @Autowired
-    private CommonUtility commonUtility = new CommonUtility();
+    private CommonUtility commonUtility;
 
     @Given("the REST service with initial car data id {string} is available and the {string} method is supported")
     public void the_rest_service_with_initial_car_data_id_is_available_and_the_method_is_supported(String id, String httpMethod) {
@@ -50,25 +50,6 @@ public class StepDefsImplementation {
         Assert.assertTrue(responseBody.contains(firstName));
         Assert.assertTrue(responseBody.contains(lastName));
     }
-
-//    @Given("^the REST service is available and the \"([^\"]*)\" method is supported$")
-//    public void the_REST_service_is_available_and_the_method_is_supported(String httpMethod) {
-//        requestType = HttpMethod.valueOf(httpMethod);
-//        requestUrl = serviceAddress;
-//    }
-//
-//    @When("^I send \"([^\"]*)\" as a command body with content type \"([^\"]*)\" to the service$")
-//    public void I_send_as_a_command_body_to_the_service(String fileName, String contentType) throws Throwable {
-//        requestAsString = "{\"firstName\": \"George\",\"lastName\": \"Harrison\",\"role\": \"teacher\"}";
-//
-//        ResponseEntity<String> response = commonUtility.processHttpRequest(requestType, requestAsString, requestUrl, contentType);
-//        retrieveResponseBodyAndStatusCode(response);
-//    }
-//
-//    @Then("^the retrieved status code is \"([^\"]*)\"$")
-//    public void the_retrieved_status_code_is(String expectedStatusCode) {
-//        Assert.assertEquals(expectedStatusCode, responseStatusCode);
-//    }
 
     private void retrieveResponseBodyAndStatusCode(ResponseEntity<String> response) {
         if (response != null) {
