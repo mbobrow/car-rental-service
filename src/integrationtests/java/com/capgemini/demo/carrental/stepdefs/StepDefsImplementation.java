@@ -106,4 +106,18 @@ public class StepDefsImplementation {
         JSONArray jsonResponseBody = new JSONArray(responseBody);
         Assert.assertTrue(jsonResponseBody.length()==21);
     }
+    //---------------Add car and remove it
+    @Given("the REST service with {string} brand {string}, model {string}, body type {string}, fuel type {string} and year of production {string} is available and the {string} method is supported")
+    public void theRESTServiceWithCarBrandModelBodyTypeFuelTypeAndYearOfProductionIsAvailableAndTheMethodIsSupported(String endpoint, String brand, String model, String type, String fuel, String year, String httpMethod) {
+    }
+
+    @Then("the retrieved body should contain the {string} of the {string} {string} and the status code {string}")
+    public void theRetrievedBodyShouldContainTheOfTheAddedCarAndTheStatusCode(String fieldKey, String operationType, String endpoint, String expectedStatusCode) throws JSONException {
+
+    }
+
+    @Given("the REST service with previously created {string} id is available and the {string} method is supported")
+    public void theRESTServiceWithPreviouslyCreatedIdIsAvailableAndTheMethodIsSupported(String endpoint, String httpMethod) {
+
+    }
 }
