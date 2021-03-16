@@ -47,3 +47,8 @@ Feature: Checking the correct acting of the Car Rental REST service
     When I send request with content type "application/json" to the service
     Then the retrieved body should contain the "id" of the 'removed' 'car' and the status code "200"
 
+  @test
+  Scenario: Remove the car that does not exist
+    Given the REST service with initial "car" data id "999" is available and the "DELETE" method is supported
+    When I send request with content type "application/json" to the service
+    Then the response status code "404"

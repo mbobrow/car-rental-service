@@ -120,4 +120,8 @@ public class StepDefsImplementation {
     public void theRESTServiceWithPreviouslyCreatedIdIsAvailableAndTheMethodIsSupported(String endpoint, String httpMethod) {
 
     }
+    //---------------Remove the car that does not exist
+    @Then("the response status code {string}")
+    public void theResponseStatusCode(String expectedStatusCode) {
+    }
 }
