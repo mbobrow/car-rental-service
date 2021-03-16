@@ -6,6 +6,7 @@ import static com.capgemini.demo.carrental.util.ConstantUtils.LOCAL_HOST_PORT;
 
 import com.capgemini.demo.carrental.util.ResponseElementsEnum;
 import com.google.common.collect.ImmutableMap;
+import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -59,6 +60,12 @@ public class StepDefsImplementation {
 
     @Autowired
     private RestTemplateUtils restTemplateUtils;
+
+    @After
+    private void cleanUp() {
+        responseStatusCode = "";
+        responseBody = "";
+    }
 
     //---------------Checking the correctness of the GET query
     @Given("the REST service with initial {string} data id {string} is available and the {string} method is supported")
