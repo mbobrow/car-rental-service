@@ -133,4 +133,32 @@ public class StepDefsImplementation {
     public void theResponseStatusCode(String expectedStatusCode) {
         Assert.assertEquals(expectedStatusCode, responseStatusCode);
     }
+    //---------------Change year of the car
+    @Given("the REST service with {string} id {string}, brand {string}, model {string}, body type {string}, fuel type {string} and year of production {string} is available and the {string} method is supported")
+    public void theRESTServiceWithCarIdCarBrandModelBodyTypeFuelTypeAndYearOfProductionIsAvailableAndTheMethodIsSupported(String endpoint, String id, String brand, String model, String type, String fuel, String year, String httpMethod) {
+        requestType = HttpMethod.valueOf(httpMethod);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(immutableMap.get(endpoint)).concat(id);
+        requestAsString = "{\"bodyType\": \""+type+"\",\"brand\": \""+brand+"\",\"fuelType\": \""+fuel+"\",\"model\": \""+model+"\",\"year\": "+year+"}";
+    }
+    //---------------Add a car to non-existing rental
+    @Given("the REST service for {string} with beginning date {string}, end date {string}, car id {string} and tenant id {string} is available and the {string} method is supported")
+    public void theRESTServiceForWithBeginningDateEndDateCarIdAndTenantIdIsAvailableAndTheMethodIsSupported(String endpoint, String beginningOfRental, String endOfRental, String carId, String tenantId, String httpMethod) {
+        requestType = HttpMethod.valueOf(httpMethod);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(immutableMap.get(endpoint));
+        requestAsString = "{ \"beginningOfRental\": \""+beginningOfRental+"\", \"carIds\": [ "+carId+" ], \"endOfRental\": \""+endOfRental+"\", \"tenantId\": "+tenantId+"}";
+    }
+    //---------------Create new rental
+    @Then("the retrieved rental body should contain the {string} {string} and the {string} {string} and the status code {string}")
+    public void theRetrievedRentalBodyShouldContainTheAndTheAndTheStatusCode(String field1key, String field1expected, String field2key, String field2expected, String expectedStatusCode) {
+        Assert.assertEquals(expectedStatusCode, responseStatusCode);
+        Assert.assertTrue(responseBody.contains("\""+field1key+"\" : \""+field1expected+"\""));
+        Assert.assertTrue(responseBody.contains("\""+field2key+"\" : \""+field2expected+"\""));
+    }
+    //---------------Check if rented car is available for rental
+    @Then("the retrieved body should not contain the {string} {string} and the {string} {string} and the status code {string}")
+    public void theRetrievedBodyShouldNotContainTheAndTheAndTheStatusCode(String field1key, String field1expected, String field2key, String field2expected, String expectedStatusCode) {
+        Assert.assertEquals(expectedStatusCode, responseStatusCode);
+        Assert.assertFalse(responseBody.contains("\""+field1key+"\" : \""+field1expected+"\""));
+        Assert.assertFalse(responseBody.contains("\""+field2key+"\" : \""+field2expected+"\""));
+    }
 }

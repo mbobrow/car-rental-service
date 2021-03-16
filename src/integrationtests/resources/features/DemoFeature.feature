@@ -105,3 +105,12 @@ Feature: Checking the correct acting of the Car Rental REST service
     Given the REST service with initial "rental search by tenant" data id "100" is available and the "GET" method is supported
     When I send request with content type "application/json" to the service
     Then the retrieved rental body should contain the "brand" "Volkswagen" and the "model" "Golf" and the status code "200"
+
+  @test
+  Scenario: Check if rented car is available for rental
+    Given the REST service for "rental" with beginning date "2022-03-09", end date "2022-04-09", car id "101" and tenant id "100" is available and the "POST" method is supported
+    When I send request with content type "application/json" to the service
+    Then the retrieved body should contain the "id" of the 'added' 'rental' and the status code "201"
+    Given the REST get all "cars available" service is available and the "GET" method is supported
+    When I send request with content type "application/json" to the service
+    Then the retrieved body should not contain the "id" "101" and the "model" "Focus" and the status code "200"
