@@ -56,7 +56,7 @@ Feature: Checking the correct acting of the Car Rental REST service
 #  Zadanie domowe
 
   @test
-  Scenario: Change year of the car
+  Scenario: Change data of the car
     Given the REST service with "car" id "100", brand "Dacia", model "Duster", body type "SUV", fuel type "PETROL" and year of production "2010" is available and the "PUT" method is supported
     When I send request with content type "application/json" to the service
     Then the retrieved body should contains the "brand" "Dacia" and the "model" "Duster" and the status code "200"
