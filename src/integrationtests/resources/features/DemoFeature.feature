@@ -40,7 +40,7 @@ Feature: Checking the correct acting of the Car Rental REST service
 
   @test
   Scenario: Add car and remove it
-    Given the REST service with "car" brand "Dacia", model "Duster", body type "SUV", fuel type "PETROL" and year of production "2010" is available and the "POST" method is supported
+    Given the REST service with "car" brand "Dacia", model "Duster", body type "SUV", fuel type "PETROL" and year of production 2010 is available and the "POST" method is supported
     When I send request with content type "application/json" to the service
     Then the retrieved body should contain the "id" of the 'added' 'car' and the status code "201"
     Given the REST service with previously created "car" id is available and the "DELETE" method is supported
