@@ -1,5 +1,7 @@
 package com.capgemini.demo.carrental.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -10,8 +12,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Component
 public class RestTemplateUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(RestTemplateUtils.class);
 
     private final RestTemplate restTemplate;
 
@@ -23,11 +30,6 @@ public class RestTemplateUtils {
         this.restTemplate = restTemplate;
     }
 
-    private void interceptErrorResponse(HttpStatusCodeException e) {
-        errorResponseStatusCode = e.getStatusCode().toString().replaceAll("\\D+", "");
-        errorResponseBody = e.getResponseBodyAsString();
-    }
-
     public ResponseEntity<String> processHttpRequest(HttpMethod httpMethod, String requestBody, String requestUrl, String contentType) {
         HttpEntity<String> entity = createRequestEntity(requestBody, contentType);
         try {
@@ -35,7 +37,7 @@ public class RestTemplateUtils {
         } catch (HttpStatusCodeException e) {
             interceptErrorResponse(e);
         }
-        return null;
+        return ResponseEntity.badRequest().build();
     }
 
     private HttpEntity<String> createRequestEntity(String requestBody, String contentType) {
@@ -44,11 +46,22 @@ public class RestTemplateUtils {
         return new HttpEntity<>(requestBody, httpHeaders);
     }
 
-    public String getErrorResponseStatusCode() {
-        return errorResponseStatusCode;
+    public Map<ResponseElementsEnum, String> retrieveResponseBodyAndStatusCode(ResponseEntity<String> response) {
+        Map<ResponseElementsEnum, String> responseElements = new HashMap<>();
+        if (!response.getStatusCode().isError()) {
+            responseElements.put(ResponseElementsEnum.RESPONSE_STATUS_CODE, String.valueOf(response.getStatusCodeValue()));
+            responseElements.put(ResponseElementsEnum.RESPONSE_BODY, response.getBody());
+            logger.info("Status code: {}", response.getStatusCodeValue());
+        } else {
+            responseElements.put(ResponseElementsEnum.RESPONSE_STATUS_CODE, errorResponseStatusCode);
+            responseElements.put(ResponseElementsEnum.RESPONSE_BODY, errorResponseBody);
+            logger.info("Status code: {}", errorResponseStatusCode);
+        }
+        return responseElements;
     }
 
-    public String getErrorResponseBody() {
-        return errorResponseBody;
+    private void interceptErrorResponse(HttpStatusCodeException e) {
+        errorResponseStatusCode = e.getStatusCode().toString().replaceAll("\\D+", "");
+        errorResponseBody = e.getResponseBodyAsString();
     }
 }

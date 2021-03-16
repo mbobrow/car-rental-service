@@ -4,7 +4,9 @@ import static com.capgemini.demo.carrental.util.ConstantUtils.API_V1;
 import static com.capgemini.demo.carrental.util.ConstantUtils.LOCAL_HOST;
 import static com.capgemini.demo.carrental.util.ConstantUtils.LOCAL_HOST_PORT;
 
+import com.capgemini.demo.carrental.util.ResponseElementsEnum;
 import com.google.common.collect.ImmutableMap;
+import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -25,12 +27,14 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.Map;
+
 @CucumberContextConfiguration
 @SpringBootTest
 @ContextConfiguration(classes = {StepDefsConfig.class})
 public class StepDefsImplementation {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StepDefsImplementation.class);
+    private static final Logger logger = LoggerFactory.getLogger(StepDefsImplementation.class);
     private static final String CAR_SERVICE_ADDRESS = LOCAL_HOST
             .concat(LOCAL_HOST_PORT)
             .concat(API_V1);
@@ -57,6 +61,12 @@ public class StepDefsImplementation {
     @Autowired
     private RestTemplateUtils restTemplateUtils;
 
+    @After
+    private void cleanUp() {
+        responseStatusCode = "";
+        responseBody = "";
+    }
+
     //---------------Checking the correctness of the GET query
     @Given("the REST service with initial {string} data id {string} is available and the {string} method is supported")
     public void the_rest_service_with_initial_car_data_id_is_available_and_the_method_is_supported(String endpoint, String id, String httpMethod) {
@@ -68,7 +78,9 @@ public class StepDefsImplementation {
     @When("I send request with content type {string} to the service")
     public void i_send_request_with_content_type_to_the_service(String contentType) {
         ResponseEntity<String> response = restTemplateUtils.processHttpRequest(requestType, requestAsString, requestUrl, contentType);
-        retrieveResponseBodyAndStatusCode(response);
+        Map<ResponseElementsEnum, String> responseElements = restTemplateUtils.retrieveResponseBodyAndStatusCode(response);
+        responseStatusCode = responseElements.get(ResponseElementsEnum.RESPONSE_STATUS_CODE);
+        responseBody = responseElements.get(ResponseElementsEnum.RESPONSE_BODY);
     }
 
     @Then("the retrieved body should contains the {string} {string} and the {string} {string} and the status code {string}")
@@ -78,19 +90,6 @@ public class StepDefsImplementation {
         Assert.assertEquals(brandName, jsonResponseBody.get(brandKey).toString());
         Assert.assertEquals(modelName, jsonResponseBody.get(modelKey).toString());
     }
-
-    private void retrieveResponseBodyAndStatusCode(ResponseEntity<String> response) {
-        if (response != null) {
-            final int responseStatusCodeNumber = response.getStatusCodeValue();
-            responseStatusCode = String.valueOf(responseStatusCodeNumber);
-            responseBody = response.getBody();
-        } else {
-            responseStatusCode = restTemplateUtils.getErrorResponseStatusCode();
-            responseBody = restTemplateUtils.getErrorResponseBody();
-        }
-        LOGGER.info("Status code: {}", responseStatusCode);
-    }
-
 
     @Given("the REST get all {string} service is available and the {string} method is supported")
     public void theRESTGetAllServiceIsAvailableAndTheMethodIsSupported(String endpoint, String httpMethod) {
