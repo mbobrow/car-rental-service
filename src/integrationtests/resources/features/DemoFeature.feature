@@ -26,5 +26,15 @@ Feature: Checking the correct acting of the Car Rental REST service
       | 102 | Volkswagen | Golf  |
       | 103 | Renault    | Clio  |
 
+  @test
+  Scenario Outline: Query for tenant id "<id>"
+    Given the REST service with initial "tenant" data id "<id>" is available and the "GET" method is supported
+    When I send request with content type "application/json" to the service
+    Then the retrieved body should contains the "name" "<name>" and the "age" "<age>" and the status code "200"
 
+    Examples:
+      | id  | name      | age |
+      | 100 | Adam      | 30  |
+      | 101 | Marek     | 39  |
+      | 102 | Katarzyna | 29  |
 
