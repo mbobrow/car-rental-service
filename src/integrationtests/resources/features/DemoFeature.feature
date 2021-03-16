@@ -67,20 +67,8 @@ Feature: Checking the correct acting of the Car Rental REST service
     Then the response status code "404"
 
   @test
-  Scenario: Add a car to non-existing rental
-    Given the REST service for "rental" with beginning date "2022-03-09", end date "2022-04-09", car id "101" and tenant id "100" is available and the "PUT" method is supported
-    When I send request with content type "application/json" to the service
-    Then the response status code "404"
-
-  @test
   Scenario: Cancel non-existing rental by Id
     Given the REST service with initial "remove rental" data id "999" is available and the "DELETE" method is supported
-    When I send request with content type "application/json" to the service
-    Then the response status code "404"
-
-  @test
-  Scenario: Search for non-existing rental by car Id
-    Given the REST service with initial "rental search by car" data id "101" is available and the "GET" method is supported
     When I send request with content type "application/json" to the service
     Then the response status code "404"
 
