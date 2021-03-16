@@ -90,4 +90,14 @@ public class StepDefsImplementation {
         }
         LOGGER.info("Status code: {}", responseStatusCode);
     }
+
+
+    @Given("the REST get all {string} service is available and the {string} method is supported")
+    public void theRESTGetAllServiceIsAvailableAndTheMethodIsSupported(String endpoint, String httpMethod) {
+        
+    }
+
+    @Then("the retrieved body should contains the list of cars and the status code {string}")
+    public void theRetrievedBodyShouldContainsTheListOfCarsAndTheStatusCode(String expectedStatusCode) {
+    }
 }

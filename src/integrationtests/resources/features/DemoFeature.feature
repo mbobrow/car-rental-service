@@ -8,3 +8,9 @@ Feature: Checking the correct acting of the Car Rental REST service
     Given the REST service with initial "car" data id "102" is available and the "GET" method is supported
     When I send request with content type "application/json" to the service
     Then the retrieved body should contains the "brand" "Volkswagen" and the "model" "Golf" and the status code "200"
+
+  @test
+  Scenario: Query for all cars
+    Given the REST get all "car" service is available and the "GET" method is supported
+    When I send request with content type "application/json" to the service
+    Then the retrieved body should contains the list of cars and the status code "200"
