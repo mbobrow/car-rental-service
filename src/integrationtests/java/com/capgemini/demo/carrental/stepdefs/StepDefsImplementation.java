@@ -97,7 +97,6 @@ public class StepDefsImplementation {
         requestType = HttpMethod.valueOf(httpMethod);
         requestUrl = CAR_SERVICE_ADDRESS.concat(immutableMap.get(endpoint));
         requestAsString = "";
-
     }
 
     @Then("the retrieved body should contains the list of cars and the status code {string}")
