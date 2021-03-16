@@ -52,3 +52,56 @@ Feature: Checking the correct acting of the Car Rental REST service
     Given the REST service with initial "car" data id "999" is available and the "DELETE" method is supported
     When I send request with content type "application/json" to the service
     Then the response status code "404"
+
+#  Zadanie domowe
+
+  @test
+  Scenario: Change year of the car
+    Given the REST service with "car" id "100", brand "Dacia", model "Duster", body type "SUV", fuel type "PETROL" and year of production "2010" is available and the "PUT" method is supported
+    When I send request with content type "application/json" to the service
+    Then the retrieved body should contains the "brand" "Dacia" and the "model" "Duster" and the status code "200"
+
+  @test
+  Scenario: Incorrect car id PUT request
+    Given the REST service with "car" id "999", brand "Dacia", model "Duster", body type "SUV", fuel type "PETROL" and year of production "2010" is available and the "PUT" method is supported
+    When I send request with content type "application/json" to the service
+    Then the response status code "404"
+
+  @test
+  Scenario: Add a car to non-existing rental
+    Given the REST service for "rental" with beginning date "2022-03-09", end date "2022-04-09", car id "101" and tenant id "100" is available and the "PUT" method is supported
+    When I send request with content type "application/json" to the service
+    Then the response status code "404"
+
+  @test
+  Scenario: Cancel non-existing rental by Id
+    Given the REST service with initial "remove rental" data id "999" is available and the "DELETE" method is supported
+    When I send request with content type "application/json" to the service
+    Then the response status code "404"
+
+  @test
+  Scenario: Search for non-existing rental by car Id
+    Given the REST service with initial "rental search by car" data id "101" is available and the "GET" method is supported
+    When I send request with content type "application/json" to the service
+    Then the response status code "404"
+
+  @test
+  Scenario: Create new rental
+    Given the REST service for "rental" with beginning date "2022-03-09", end date "2022-04-09", car id "101" and tenant id "100" is available and the "POST" method is supported
+    When I send request with content type "application/json" to the service
+    Then the retrieved body should contain the "id" of the 'added' 'rental' and the status code "201"
+    Given the REST service with initial "rental search by car" data id "101" is available and the "GET" method is supported
+    When I send request with content type "application/json" to the service
+    Then the retrieved rental body should contain the "brand" "Ford" and the "model" "Focus" and the status code "200"
+
+  @test
+  Scenario: Add new car to existing rental
+    Given the REST service for "rental" with beginning date "2022-03-09", end date "2022-04-09", car id "101" and tenant id "100" is available and the "POST" method is supported
+    When I send request with content type "application/json" to the service
+    Then the retrieved body should contain the "id" of the 'added' 'rental' and the status code "201"
+    Given the REST service for "rental" with beginning date "2022-03-09", end date "2022-04-09", car id "102" and tenant id "100" is available and the "PUT" method is supported
+    When I send request with content type "application/json" to the service
+    Then the retrieved body should contain the "id" of the 'added' 'rental' and the status code "200"
+    Given the REST service with initial "rental search by tenant" data id "100" is available and the "GET" method is supported
+    When I send request with content type "application/json" to the service
+    Then the retrieved rental body should contain the "brand" "Volkswagen" and the "model" "Golf" and the status code "200"

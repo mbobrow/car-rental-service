@@ -131,5 +131,6 @@ public class StepDefsImplementation {
     //---------------Remove the car that does not exist
     @Then("the response status code {string}")
     public void theResponseStatusCode(String expectedStatusCode) {
+        Assert.assertEquals(expectedStatusCode, responseStatusCode);
     }
 }
