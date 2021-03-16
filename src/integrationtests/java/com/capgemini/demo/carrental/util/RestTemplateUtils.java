@@ -37,7 +37,7 @@ public class RestTemplateUtils {
         } catch (HttpStatusCodeException e) {
             interceptErrorResponse(e);
         }
-        return null;
+        return ResponseEntity.badRequest().build();
     }
 
     private HttpEntity<String> createRequestEntity(String requestBody, String contentType) {
@@ -48,7 +48,7 @@ public class RestTemplateUtils {
 
     public Map<ResponseElementsEnum, String> retrieveResponseBodyAndStatusCode(ResponseEntity<String> response) {
         Map<ResponseElementsEnum, String> responseElements = new HashMap<>();
-        if (response != null) {
+        if (!response.getStatusCode().isError()) {
             responseElements.put(ResponseElementsEnum.RESPONSE_STATUS_CODE, String.valueOf(response.getStatusCodeValue()));
             responseElements.put(ResponseElementsEnum.RESPONSE_BODY, response.getBody());
             logger.info("Status code: {}", response.getStatusCodeValue());
