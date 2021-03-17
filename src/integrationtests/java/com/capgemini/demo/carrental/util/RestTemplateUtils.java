@@ -18,7 +18,7 @@ import java.util.Map;
 @Component
 public class RestTemplateUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(RestTemplateUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestTemplateUtils.class);
 
     private final RestTemplate restTemplate;
 
@@ -51,11 +51,11 @@ public class RestTemplateUtils {
         if (!response.getStatusCode().isError()) {
             responseElements.put(ResponseElementsEnum.RESPONSE_STATUS_CODE, String.valueOf(response.getStatusCodeValue()));
             responseElements.put(ResponseElementsEnum.RESPONSE_BODY, response.getBody());
-            logger.info("Status code: {}", response.getStatusCodeValue());
+            LOGGER.info("Status code: {}", response.getStatusCodeValue());
         } else {
             responseElements.put(ResponseElementsEnum.RESPONSE_STATUS_CODE, errorResponseStatusCode);
             responseElements.put(ResponseElementsEnum.RESPONSE_BODY, errorResponseBody);
-            logger.info("Status code: {}", errorResponseStatusCode);
+            LOGGER.info("Status code: {}", errorResponseStatusCode);
         }
         return responseElements;
     }
