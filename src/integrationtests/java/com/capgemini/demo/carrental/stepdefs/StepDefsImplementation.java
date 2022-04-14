@@ -3,10 +3,12 @@ package com.capgemini.demo.carrental.stepdefs;
 import static com.capgemini.demo.carrental.util.ConstantUtils.CAR_SERVICE_ADDRESS;
 import static com.capgemini.demo.carrental.util.ConstantUtils.ENDPOINT_SELECTOR;
 
+import java.util.List;
 import java.util.Map;
 
 import com.capgemini.demo.carrental.model.Car;
 import com.capgemini.demo.carrental.model.Rental;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
@@ -121,4 +123,18 @@ public class StepDefsImplementation {
         requestType = HttpMethod.valueOf(httpMethod);
         requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint)).concat(Integer.toString(id));
     }
+
+    @Given("the REST service with {string} brand, model, body type, fuel type and year of production is available and the {string} method is supported")
+    public void theRESTServiceWithBrandModelBodyTypeFuelTypeAndYearOfProductionIsAvailableAndTheMethodIsSupported(String endpoint, String httpMethod, DataTable dataTable)
+            throws JSONException {
+        requestType = HttpMethod.valueOf(httpMethod);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint));
+        List<Map<String, String>> mapa = dataTable.asMaps(String.class, String.class);
+        requestBody.put("bodyType", mapa.get(0).get("bodytype"));
+        requestBody.put("brand", mapa.get(0).get("brand"));
+        requestBody.put("fuelType", mapa.get(0).get("fuel"));
+        requestBody.put("model", mapa.get(0).get("model"));
+        requestBody.put("year", mapa.get(0).get("year"));
+    }
+
 }

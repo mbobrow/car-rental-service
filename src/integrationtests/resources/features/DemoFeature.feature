@@ -53,3 +53,14 @@ Feature: Checking the correct acting of the Car Rental REST service
     Given the REST service with previously created "car" id is available and the "DELETE" method is supported
     When I send request with content type "application/json" to the service
     Then the retrieved body should contain the "id" of the 'removed' 'car' and the status code "200"
+
+  @test
+  Scenario: Add car (using data table) and remove it
+    Given the REST service with "car" brand, model, body type, fuel type and year of production is available and the "POST" method is supported
+      | brand | model  | bodytype | fuel   | year |
+      | Dacia | Duster | SUV      | PETROL | 2010 |
+    When I send request with content type "application/json" to the service
+    Then the retrieved body should contain the "id" of the 'added' 'car' and the status code "201"
+    Given the REST service with previously created "car" id is available and the "DELETE" method is supported
+    When I send request with content type "application/json" to the service
+    Then the retrieved body should contain the "id" of the 'removed' 'car' and the status code "200"
