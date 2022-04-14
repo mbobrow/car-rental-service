@@ -15,5 +15,6 @@ public class Car {
     private String bodyType;
     private String fuelType;
     private Integer year;
+    private boolean isRented;
 
 }
