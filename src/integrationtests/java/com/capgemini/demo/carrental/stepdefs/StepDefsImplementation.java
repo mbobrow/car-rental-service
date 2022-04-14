@@ -20,6 +20,7 @@ import com.capgemini.demo.carrental.util.RestTemplateUtils;
 
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -79,5 +80,18 @@ public class StepDefsImplementation {
         JSONObject jsonResponseBody = new JSONObject(responseBody);
         Assert.assertEquals(brandName, jsonResponseBody.get(brandKey).toString());
         Assert.assertEquals(modelName, jsonResponseBody.get(modelKey).toString());
+    }
+
+    @Given("the REST get all {string} service is available and the {string} method is supported")
+    public void theRESTGetAllServiceIsAvailableAndTheMethodIsSupported(String endpoint, String httpMethod) {
+        requestType = HttpMethod.valueOf(httpMethod);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint));
+    }
+
+    @Then("the retrieved body should contains the list of cars and the status code {string}")
+    public void theRetrievedBodyShouldContainsTheListOfCarsAndTheStatusCode(String expectedStatusCode) throws JSONException {
+        Assert.assertEquals(expectedStatusCode, responseStatusCode);
+        JSONArray jsonResponseBody = new JSONArray(responseBody);
+        Assert.assertNotEquals("Lista pusta",0, jsonResponseBody.length());
     }
 }
