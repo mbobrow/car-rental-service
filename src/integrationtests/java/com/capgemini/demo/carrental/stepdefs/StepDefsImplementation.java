@@ -94,4 +94,31 @@ public class StepDefsImplementation {
         JSONArray jsonResponseBody = new JSONArray(responseBody);
         Assert.assertNotEquals("Lista pusta",0, jsonResponseBody.length());
     }
+
+    @Given("the REST service with {string} brand {string}, model {string}, body type {string}, fuel type {string} and year of production {int} is available and the {string} method is supported")
+    public void theRESTServiceWithCarBrandModelBodyTypeFuelTypeAndYearOfProductionIsAvailableAndTheMethodIsSupported(String endpoint, String brand, String model, String type, String fuel, int year, String httpMethod)
+            throws JSONException {
+        requestType = HttpMethod.valueOf(httpMethod);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint));
+        requestBody.put("bodyType", type);
+        requestBody.put("brand", brand);
+        requestBody.put("fuelType", fuel);
+        requestBody.put("model", model);
+        requestBody.put("year", year);
+    }
+
+    @Then("the retrieved body should contain the {string} of the {string} {string} and the status code {string}")
+    public void theRetrievedBodyShouldContainTheOfTheAddedCarAndTheStatusCode(String fieldKey, String operationType, String endpoint, String expectedStatusCode) throws JSONException {
+        Assert.assertEquals(expectedStatusCode, responseStatusCode);
+        JSONObject jsonResponseBody = new JSONObject(responseBody);
+        Assert.assertTrue("Response body does not contain \"id\" property", jsonResponseBody.has("id"));
+        id = (Integer) jsonResponseBody.get(fieldKey);
+        Assert.assertNotNull(id);
+    }
+
+    @Given("the REST service with previously created {string} id is available and the {string} method is supported")
+    public void theRESTServiceWithPreviouslyCreatedIdIsAvailableAndTheMethodIsSupported(String endpoint, String httpMethod) {
+        requestType = HttpMethod.valueOf(httpMethod);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint)).concat(Integer.toString(id));
+    }
 }
