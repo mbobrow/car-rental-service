@@ -10,6 +10,15 @@ Feature: Checking the correct acting of the Car Rental REST service
     Then The response code is 200
       And The response length is bigger than 1
 
+@test
+  Scenario: Send POST request to cars endpoint to add a new car
+    Given the REST service with initial "car" endpoint is available and the "POST" method is supported
+      And User prepares a car request body with data
+        | brand | model | bodyType  | fuelType | year | isRented |
+        | Opel  | Astra | HATCHBACK | DIESEL   | 2017 | false    |
+    When I send a valid request with content type "application/json" to the service
+    Then The response code is 201
+
 
 
 

@@ -3,11 +3,13 @@ package com.capgemini.demo.carrental.stepdefs;
 import static com.capgemini.demo.carrental.util.ConstantUtils.CAR_SERVICE_ADDRESS;
 import static com.capgemini.demo.carrental.util.ConstantUtils.ENDPOINT_SELECTOR;
 
+import java.util.List;
 import java.util.Map;
 
 import com.capgemini.demo.carrental.model.Car;
 import com.capgemini.demo.carrental.model.Rental;
 import com.capgemini.demo.carrental.util.ConstantUtils;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -73,8 +75,8 @@ public class StepDefsImplementation {
     public void sendRequest(String contentType) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf(contentType));
-        HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
-        responseEntity = restTemplate.exchange(requestUrl, HttpMethod.GET, requestEntity, String.class);
+        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody.toString(), headers);
+        responseEntity = restTemplate.exchange(requestUrl, requestType, requestEntity, String.class);
     }
 
     @Then("The response code is {int}")
@@ -92,6 +94,23 @@ public class StepDefsImplementation {
         //Assert
         Assert.assertTrue(actualResponseLength > expectedResponseLength);
     }
+
+
+    @And("User prepares a car request body with data")
+    public void prepareCareRequestBody(DataTable entry) {
+       List<Map<String, String>> requestMaps = entry.asMaps(String.class, String.class);
+       requestBody = new JSONObject(requestMaps.get(0));
+    }
+
+
+
+
+
+
+
+
+
+
 
 
     @When("Send GET request to cars endpoint and validate the response")
@@ -147,7 +166,4 @@ public class StepDefsImplementation {
         Assert.assertEquals(brandName, jsonResponseBody.get(brandKey).toString());
         Assert.assertEquals(modelName, jsonResponseBody.get(modelKey).toString());
     }
-
-
-
 }
