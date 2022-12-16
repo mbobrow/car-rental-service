@@ -10,15 +10,17 @@ Feature: Checking the correct acting of the Car Rental REST service
     Then The response code is 200
       And The response length is bigger than 1
 
+
 @test
   Scenario: Send POST request to cars endpoint to add a new car and then delete it
     Given the REST service with initial "car" endpoint is available and the "POST" method is supported
-      And User prepares a car request body with data
+      And User prepares a car request body with data using dataModel
         | brand | model | bodyType  | fuelType | year | isRented |
         | Opel  | Astra | HATCHBACK | DIESEL   | 2017 | false    |
     When I send a valid request with content type "application/json" to the service
     Then The response code is 201
-      And The car endpoint response has correct data
+      And Response should have correct data using dataModel
+
 
   @test
   Scenario Outline: Send <method> request to the cars endpoint to <method> the created car

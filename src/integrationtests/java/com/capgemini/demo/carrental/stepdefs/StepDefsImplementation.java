@@ -8,6 +8,7 @@ import com.capgemini.demo.carrental.util.RestTemplateUtils;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.DataTableType;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -42,6 +43,7 @@ public class StepDefsImplementation {
     private String responseStatusCode;
     private String responseBody;
     private Integer carId;
+    Object requestDataModel;
 
     @Autowired
     private RestTemplateUtils restTemplateUtils;
@@ -60,7 +62,7 @@ public class StepDefsImplementation {
     RestTemplate restTemplate = new RestTemplate();
     ResponseEntity<Car[]> responseCar;
     ResponseEntity<Rental> responseRental;
-    ResponseEntity<String> responseEntity;
+    ResponseEntity<Object> responseEntity;
 
 
     @Given("the REST service with initial {string} endpoint is available and the {string} method is supported")
@@ -73,8 +75,8 @@ public class StepDefsImplementation {
     public void sendRequest(String contentType) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf(contentType));
-        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody.toString(), headers);
-        responseEntity = restTemplate.exchange(requestUrl, requestType, requestEntity,String.class);
+        HttpEntity<Object> requestEntity = new HttpEntity<>(requestDataModel, headers);
+        responseEntity = restTemplate.exchange(requestUrl, requestType, requestEntity, Object.class);
     }
 
     @Then("The response code is {int}")
@@ -104,25 +106,44 @@ public class StepDefsImplementation {
         requestBody.put("isRented", !requestMaps.get(0).get("isRented").equals("false"));
     }
 
-    @And("The car endpoint response has correct data")
-    public void assertResponseHasCorrectData() throws JSONException {
-        JSONObject response = new JSONObject(responseEntity.getBody());
-        response.remove("id");
+    @DataTableType
+    public Car mapDataTableToCarObject(Map<String, String> entry) {
+        Car car = new Car();
+        car.setBrand(entry.get("brand"));
+        car.setModel(entry.get("model"));
+        car.setBodyType(entry.get("bodyType"));
+        car.setFuelType(entry.get("fuelType"));
+        car.setYear(entry.get("year"));
+        car.setIsRented(entry.get("isRented"));
+        return car;
+    }
+
+    @And("User prepares a car request body with data using dataModel")
+    public void userPreparesACarRequestBodyWithDataUsingDataModel(Car carRequestDataModel) {
+        requestDataModel = carRequestDataModel;
+    }
+
+    @Then("Response should have correct data using dataModel")
+    public void responseShouldHaveCorrectDataUsingDataModel() {
+        Car  car = (Car) responseEntity.getBody();
         //Assert
-        Assert.assertEquals(requestBody.toString(), response.toString());
-    }
-
-    @When("the REST service with initial {string} endpoint and created car id is available and the {string} method is supported")
-    public void requestWithId (String endpoint, String httpMethod) throws JSONException {
-        requestType = HttpMethod.valueOf(httpMethod);
-        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint).concat(new JSONObject(responseEntity.getBody()).get("id").toString()));
+        Assert.assertEquals(requestDataModel, car);
     }
 
 
+//    @And("The car endpoint response has correct data")
+//    public void assertResponseHasCorrectData() throws JSONException {
+//        JSONObject response = new JSONObject(responseEntity.getBody());
+//        response.remove("id");
+//        //Assert
+//        Assert.assertEquals(requestBody.toString(), response.toString());
+//    }
 
-
-
-
+//    @When("the REST service with initial {string} endpoint and created car id is available and the {string} method is supported")
+//    public void requestWithId(String endpoint, String httpMethod) throws JSONException {
+//        requestType = HttpMethod.valueOf(httpMethod);
+//        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint).concat(new JSONObject(responseEntity.getBody()).get("id").toString()));
+//    }
 
 
     @When("Send GET request to cars endpoint and validate the response")
@@ -167,6 +188,7 @@ public class StepDefsImplementation {
         Assert.assertEquals(brandName, jsonResponseBody.get(brandKey).toString());
         Assert.assertEquals(modelName, jsonResponseBody.get(modelKey).toString());
     }
+
 
 
 }
