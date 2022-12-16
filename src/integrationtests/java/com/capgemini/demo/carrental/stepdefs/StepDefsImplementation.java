@@ -1,14 +1,10 @@
 package com.capgemini.demo.carrental.stepdefs;
 
-import static com.capgemini.demo.carrental.util.ConstantUtils.CAR_SERVICE_ADDRESS;
-import static com.capgemini.demo.carrental.util.ConstantUtils.ENDPOINT_SELECTOR;
-
-import java.util.List;
-import java.util.Map;
-
+import com.capgemini.demo.carrental.config.StepDefsConfig;
 import com.capgemini.demo.carrental.model.Car;
 import com.capgemini.demo.carrental.model.Rental;
-import com.capgemini.demo.carrental.util.ConstantUtils;
+import com.capgemini.demo.carrental.util.ResponseElementsEnum;
+import com.capgemini.demo.carrental.util.RestTemplateUtils;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -17,11 +13,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
-
-import com.capgemini.demo.carrental.config.StepDefsConfig;
-import com.capgemini.demo.carrental.util.ResponseElementsEnum;
-import com.capgemini.demo.carrental.util.RestTemplateUtils;
-
+import jdk.nashorn.internal.parser.JSONParser;
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONArray;
@@ -31,6 +23,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+
+import static com.capgemini.demo.carrental.util.ConstantUtils.CAR_SERVICE_ADDRESS;
+import static com.capgemini.demo.carrental.util.ConstantUtils.ENDPOINT_SELECTOR;
 
 @CucumberContextConfiguration
 @SpringBootTest
@@ -42,7 +41,7 @@ public class StepDefsImplementation {
     private String requestUrl;
     private String responseStatusCode;
     private String responseBody;
-    private Integer id;
+    private Integer carId;
 
     @Autowired
     private RestTemplateUtils restTemplateUtils;
@@ -64,9 +63,8 @@ public class StepDefsImplementation {
     ResponseEntity<String> responseEntity;
 
 
-
     @Given("the REST service with initial {string} endpoint is available and the {string} method is supported")
-    public void prepareCarEndpoint(String endpoint, String httpMethod) {
+    public void prepareEndpoint(String endpoint, String httpMethod) {
         requestType = HttpMethod.valueOf(httpMethod);
         requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint));
     }
@@ -76,7 +74,7 @@ public class StepDefsImplementation {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf(contentType));
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody.toString(), headers);
-        responseEntity = restTemplate.exchange(requestUrl, requestType, requestEntity, String.class);
+        responseEntity = restTemplate.exchange(requestUrl, requestType, requestEntity,String.class);
     }
 
     @Then("The response code is {int}")
@@ -90,21 +88,35 @@ public class StepDefsImplementation {
     @And("The response length is bigger than {int}")
     public void theResponseLengthIs(int expectedResponseLength) throws JSONException {
         //Act
-        int actualResponseLength  = new JSONArray(responseEntity.getBody()).length();
+        int actualResponseLength = new JSONArray(responseEntity.getBody()).length();
         //Assert
         Assert.assertTrue(actualResponseLength > expectedResponseLength);
     }
 
-
     @And("User prepares a car request body with data")
-    public void prepareCareRequestBody(DataTable entry) {
-       List<Map<String, String>> requestMaps = entry.asMaps(String.class, String.class);
-       requestBody = new JSONObject(requestMaps.get(0));
+    public void prepareCareRequestBody(DataTable entry) throws JSONException {
+        List<Map<String, String>> requestMaps = entry.asMaps(String.class, String.class);
+        requestBody.put("brand", requestMaps.get(0).get("brand"));
+        requestBody.put("model", requestMaps.get(0).get("model"));
+        requestBody.put("bodyType", requestMaps.get(0).get("bodyType"));
+        requestBody.put("fuelType", requestMaps.get(0).get("fuelType"));
+        requestBody.put("year", Integer.valueOf(requestMaps.get(0).get("year")));
+        requestBody.put("isRented", !requestMaps.get(0).get("isRented").equals("false"));
     }
 
+    @And("The car endpoint response has correct data")
+    public void assertResponseHasCorrectData() throws JSONException {
+        JSONObject response = new JSONObject(responseEntity.getBody());
+        response.remove("id");
+        //Assert
+        Assert.assertEquals(requestBody.toString(), response.toString());
+    }
 
-
-
+    @When("the REST service with initial {string} endpoint and created car id is available and the {string} method is supported")
+    public void requestWithId (String endpoint, String httpMethod) throws JSONException {
+        requestType = HttpMethod.valueOf(httpMethod);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint).concat(new JSONObject(responseEntity.getBody()).get("id").toString()));
+    }
 
 
 
@@ -133,17 +145,6 @@ public class StepDefsImplementation {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
     //---------------Checking the correctness of the GET query
     @Given("the REST service with initial {string} data id {string} is available and the {string} method is supported")
     public void the_rest_service_with_initial_car_data_id_is_available_and_the_method_is_supported(String endpoint, String id, String httpMethod) {
@@ -166,4 +167,6 @@ public class StepDefsImplementation {
         Assert.assertEquals(brandName, jsonResponseBody.get(brandKey).toString());
         Assert.assertEquals(modelName, jsonResponseBody.get(modelKey).toString());
     }
+
+
 }
