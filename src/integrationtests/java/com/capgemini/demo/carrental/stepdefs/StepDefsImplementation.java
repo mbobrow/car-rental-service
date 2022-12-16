@@ -7,8 +7,10 @@ import java.util.Map;
 
 import com.capgemini.demo.carrental.model.Car;
 import com.capgemini.demo.carrental.model.Rental;
+import com.capgemini.demo.carrental.util.ConstantUtils;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -20,11 +22,11 @@ import com.capgemini.demo.carrental.util.RestTemplateUtils;
 
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.client.RestTemplate;
 
@@ -57,6 +59,71 @@ public class StepDefsImplementation {
     RestTemplate restTemplate = new RestTemplate();
     ResponseEntity<Car[]> responseCar;
     ResponseEntity<Rental> responseRental;
+    ResponseEntity<String> responseEntity;
+
+
+
+    @Given("the REST service with initial {string} endpoint is available and the {string} method is supported")
+    public void prepareCarEndpoint(String endpoint, String httpMethod) {
+        requestType = HttpMethod.valueOf(httpMethod);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint));
+    }
+
+    @When("I send a valid request with content type {string} to the service")
+    public void sendRequest(String contentType) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.valueOf(contentType));
+        HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
+        responseEntity = restTemplate.exchange(requestUrl, HttpMethod.GET, requestEntity, String.class);
+    }
+
+    @Then("The response code is {int}")
+    public void theResponseCodeIs(int expectedResponseCode) {
+        //Act
+        int actualStatusCode = responseEntity.getStatusCodeValue();
+        //Assert
+        Assert.assertEquals(expectedResponseCode, actualStatusCode);
+    }
+
+    @And("The response length is bigger than {int}")
+    public void theResponseLengthIs(int expectedResponseLength) throws JSONException {
+        //Act
+        int actualResponseLength  = new JSONArray(responseEntity.getBody()).length();
+        //Assert
+        Assert.assertTrue(actualResponseLength > expectedResponseLength);
+    }
+
+
+    @When("Send GET request to cars endpoint and validate the response")
+    public void sendGetRequestToCar() throws JSONException {
+        String endpoint = CAR_SERVICE_ADDRESS + ENDPOINT_SELECTOR.get("car");
+
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
+
+        RestTemplate restTemp = new RestTemplate();
+        ResponseEntity<String> responseEntity = restTemp.exchange(endpoint, HttpMethod.GET, requestEntity, String.class);
+
+        //Assert
+        Assert.assertEquals(200, responseEntity.getStatusCodeValue());
+
+
+        JSONArray jsonResponse = new JSONArray(responseEntity.getBody());
+        int carsAmount = jsonResponse.length();
+        Assert.assertEquals(21, carsAmount);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     //---------------Checking the correctness of the GET query
     @Given("the REST service with initial {string} data id {string} is available and the {string} method is supported")
@@ -80,4 +147,7 @@ public class StepDefsImplementation {
         Assert.assertEquals(brandName, jsonResponseBody.get(brandKey).toString());
         Assert.assertEquals(modelName, jsonResponseBody.get(modelKey).toString());
     }
+
+
+
 }
