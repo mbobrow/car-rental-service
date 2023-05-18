@@ -5,8 +5,10 @@ import com.capgemini.demo.carrental.model.Car;
 import com.capgemini.demo.carrental.model.Rental;
 import com.capgemini.demo.carrental.util.ResponseElementsEnum;
 import com.capgemini.demo.carrental.util.RestTemplateUtils;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -113,5 +115,17 @@ public class StepDefsImplementation {
         JSONObject jsonResponseBody = new JSONObject(responseBody);
         Assert.assertEquals(brandName, jsonResponseBody.get(brandKey).toString());
         Assert.assertEquals(modelName, jsonResponseBody.get(modelKey).toString());
+    }
+
+    @Given("The REST service with initial {string} endpoint is available and the {string} method is supported")
+    public void prepareCarPostEndpoint(String endpoint, String httpMethod) {
+        requestType = HttpMethod.valueOf(httpMethod);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint));
+    }
+
+    @And("Prepare request body with data")
+    public void prepareRequestBodyWithData(DataTable table) {
+        Map<String, String> requestAsMap = table.asMaps().get(0);
+        request = new JSONObject(requestAsMap);
     }
 }
