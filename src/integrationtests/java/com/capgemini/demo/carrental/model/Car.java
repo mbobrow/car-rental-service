@@ -8,10 +8,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Car {
+    private int id;
     private String brand;
     private String model;
     private String bodyType;
     private String fuelType;
-    private String year;
+    private int year;
     private String isRented;
 }

@@ -3,7 +3,7 @@ Feature: Checking the correct acting of the Car Rental REST service
   I want to validate the execution of the GET, POST, PUT, PATCH and DELETE methods
   By sending queries to the service
 
- @test
+# @test
   Scenario: Send GET request to cars endpoint to get all cars
     Given the REST service with initial "car" endpoint and 102 id is available and the "GET" method is supported
     When I send a valid request with content type "application/json" to the service
@@ -21,9 +21,20 @@ Feature: Checking the correct acting of the Car Rental REST service
   #Send GET to car/id with id of the created car
   #Assert some response data is correct (the same as of the car we inserted in the previous step)
 
+#  @test
+  Scenario: On POST request to car endpoint a new car is created
+    Given The REST service with initial "car" endpoint is available and the "POST" method is supported
+    And Prepare request body with data brand "Fiat" model "Panda" bodyType "SEDAN" fuelType "PETROL" year 2015
+    When I send a valid object request with content type "application/json" to the service
+    Then The response code is 201
+    And The response body has key model and Panda value
 
-
-
+ @test
+  Scenario: Send GET request to cars endpoint to get all cars
+    Given The REST service with initial "car" endpoint is available and the "GET" method is supported
+    When I send a valid request with objet content type "application/json" to the service
+    Then The response code is 200
+#    And The response body has key brand and Volkswagen value
 
 
 

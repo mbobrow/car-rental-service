@@ -22,7 +22,10 @@ import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.capgemini.demo.carrental.util.ConstantUtils.CAR_SERVICE_ADDRESS;
 import static com.capgemini.demo.carrental.util.ConstantUtils.ENDPOINT_SELECTOR;
@@ -39,6 +42,7 @@ public class StepDefsImplementation {
     private String responseBody;
     private Integer carId;
     JSONObject request = new JSONObject();
+    private Car addNewCar = new Car();
 
     @Autowired
     private RestTemplateUtils restTemplateUtils;
@@ -127,5 +131,34 @@ public class StepDefsImplementation {
     public void prepareRequestBodyWithData(DataTable table) {
         Map<String, String> requestAsMap = table.asMaps().get(0);
         request = new JSONObject(requestAsMap);
+    }
+
+
+    @And("Prepare request body with data brand {string} model {string} bodyType {string} fuelType {string} year {int}")
+    public void prepareRequestBodyWithDataBrandModelBodyTypeFuelTypeYear(String brand, String model, String bodyType, String fuelType, int year) {
+        addNewCar.setBrand(brand);
+        addNewCar.setModel(model);
+        addNewCar.setBodyType(bodyType);
+        addNewCar.setFuelType(fuelType);
+        addNewCar.setYear(year);
+    }
+
+    @When("I send a valid object request with content type {string} to the service")
+    public void iSendAValidObjectRequestWithContentTypeToTheService(String arg0) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity objectEntity = new HttpEntity(addNewCar, headers);
+        ResponseEntity<Car> responseObject = restTemplate.exchange(requestUrl, HttpMethod.POST, objectEntity, Car.class);
+        System.out.println("");
+    }
+
+    @When("I send a valid request with objet content type {string} to the service")
+    public void iSendAValidRequestWithObjetContentTypeToTheService(String arg0) {
+        Car[] responseList = restTemplate.getForObject(requestUrl, Car[].class);
+        List<Car> mercedesCars = Arrays.stream(responseList).filter(x -> x.getBrand().equals("Mercedes"))
+                        .collect(Collectors.toList());
+        List<Integer> mercedesIds = Arrays.stream(responseList).filter(x -> x.getBrand().equals("Mercedes"))
+                        .map(Car::getId).collect(Collectors.toList());
+        System.out.println("");
     }
 }
