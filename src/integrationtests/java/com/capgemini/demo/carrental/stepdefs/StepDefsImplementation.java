@@ -14,7 +14,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
-import jdk.nashorn.internal.parser.JSONParser;
+
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONArray;
@@ -25,7 +25,6 @@ import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +42,7 @@ public class StepDefsImplementation {
     private String responseStatusCode;
     private String responseBody;
     private Integer carId;
-    Object requestDataModel;
+    JSONObject request = new JSONObject();
 
     @Autowired
     private RestTemplateUtils restTemplateUtils;
@@ -62,21 +61,21 @@ public class StepDefsImplementation {
     RestTemplate restTemplate = new RestTemplate();
     ResponseEntity<Car[]> responseCar;
     ResponseEntity<Rental> responseRental;
-    ResponseEntity<Object> responseEntity;
+    ResponseEntity<String> responseEntity;
 
 
-    @Given("the REST service with initial {string} endpoint is available and the {string} method is supported")
-    public void prepareEndpoint(String endpoint, String httpMethod) {
+    @Given("the REST service with initial {string} endpoint and {} id is available and the {string} method is supported")
+    public void prepareEndpoint(String endpoint, String id, String httpMethod) {
         requestType = HttpMethod.valueOf(httpMethod);
-        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint));
+        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint) + id);
     }
 
     @When("I send a valid request with content type {string} to the service")
     public void sendRequest(String contentType) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf(contentType));
-        HttpEntity<Object> requestEntity = new HttpEntity<>(requestDataModel, headers);
-        responseEntity = restTemplate.exchange(requestUrl, requestType, requestEntity, Object.class);
+        HttpEntity<Object> requestEntity = new HttpEntity<>(request.toString(), headers);
+        responseEntity = restTemplate.exchange(requestUrl, requestType, requestEntity, String.class);
     }
 
     @Then("The response code is {int}")
@@ -86,6 +85,28 @@ public class StepDefsImplementation {
         //Assert
         Assert.assertEquals(expectedResponseCode, actualStatusCode);
     }
+
+    @Then("The response body has key {} and {} value")
+    public void responseHasKeyAndValue(String expectedKey, String expectedValue) throws JSONException {
+        //Arrange
+
+        //Act
+        String actualValue = new JSONObject(responseEntity.getBody())
+                .get(expectedKey).toString();
+        //Assert
+        Assert.assertEquals(expectedValue, actualValue);
+    }
+
+
+
+
+
+
+
+
+
+
+
 
     @And("The response length is bigger than {int}")
     public void theResponseLengthIs(int expectedResponseLength) throws JSONException {
@@ -118,17 +139,17 @@ public class StepDefsImplementation {
         return car;
     }
 
-    @And("User prepares a car request body with data using dataModel")
-    public void userPreparesACarRequestBodyWithDataUsingDataModel(Car carRequestDataModel) {
-        requestDataModel = carRequestDataModel;
-    }
+//    @And("User prepares a car request body with data using dataModel")
+//    public void userPreparesACarRequestBodyWithDataUsingDataModel(Car carRequestDataModel) {
+//        request = carRequestDataModel;
+//    }
 
-    @Then("Response should have correct data using dataModel")
-    public void responseShouldHaveCorrectDataUsingDataModel() {
-        Car  car = (Car) responseEntity.getBody();
-        //Assert
-        Assert.assertEquals(requestDataModel, car);
-    }
+//    @Then("Response should have correct data using dataModel")
+//    public void responseShouldHaveCorrectDataUsingDataModel() {
+//        Car  car = (Car) responseEntity.getBody();
+//        //Assert
+//        Assert.assertEquals(requestDataModel, car);
+//    }
 
 
 //    @And("The car endpoint response has correct data")
