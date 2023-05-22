@@ -14,12 +14,34 @@ Feature: Checking the correct acting of the Car Rental REST service
      Given The REST service with initial "car" endpoint is available and the "POST" method is supported
      And Prepare request body with data
        | brand    | model     | bodyType | fuelType | year | isRented |
-       | FordTest | FocusTest | SEDAN    | PETROL   | 2020 | false    |
+       | FordTest | FocusTest | SEDAN    | PETROL   | 1990 | false    |
      When I send a valid request with content type "application/json" to the service
      Then The response code is 201
      And The response body has key model and FocusTest value
-  #Send GET to car/id with id of the created car
-  #Assert some response data is correct (the same as of the car we inserted in the previous step)
+     When The REST service with initial "car" endpoint and id of the added resource is available and the "GET" method is supported
+     And I send a valid request with content type "application/json" to the service
+     Then The response code is 200
+     And The response body has key year and 1990 value
+
+  Scenario: On DELETE method to car endpoint a car is removed
+    Given The REST service with initial "car" endpoint is available and the "POST" method is supported
+    And Prepare request body with data
+      | brand    | model     | bodyType | fuelType | year | isRented |
+      | FordTest | FocusTest | SEDAN    | PETROL   | 1990 | false    |
+    When I send a valid request with content type "application/json" to the service
+    Then The response code is 201
+    And Save crated car id
+    And The response body has key model and FocusTest value
+    When The REST service with initial "car" endpoint and id of the added resource is available and the "DELETE" method is supported
+    And I send a valid request with content type "application/json" to the service
+    Then The response code is 200
+    When The REST service with initial "car" endpoint and id of the added resource is available and the "GET" method is supported
+#    Exception is thrown because response has an error. To tackle that .exchange method has to be in try catch and in the catch section error code
+#    and body has to be extracted from the error.
+    And I send a valid request with content type "application/json" to the service
+    Then The response code is 404
+
+
 
 
 

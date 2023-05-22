@@ -128,4 +128,15 @@ public class StepDefsImplementation {
         Map<String, String> requestAsMap = table.asMaps().get(0);
         request = new JSONObject(requestAsMap);
     }
+
+    @When("The REST service with initial {string} endpoint and id of the added resource is available and the {string} method is supported")
+    public void prepareCarEndpointWithAddedCar(String endpoint, String httpMethod) throws JSONException {
+        requestType = HttpMethod.valueOf(httpMethod);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint) + carId);
+    }
+
+    @And("Save crated car id")
+    public void saveCratedCarId() throws JSONException {
+        carId = Integer.valueOf(new JSONObject(responseEntity.getBody()).get("id").toString());
+    }
 }
