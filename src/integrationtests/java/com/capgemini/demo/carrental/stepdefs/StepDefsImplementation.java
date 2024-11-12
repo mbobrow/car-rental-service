@@ -5,6 +5,9 @@ import static com.capgemini.demo.carrental.util.ConstantUtils.ENDPOINT_SELECTOR;
 
 import java.util.Map;
 
+import com.capgemini.carrental.model.BodyType;
+import com.capgemini.carrental.model.FuelType;
+import com.capgemini.demo.carrental.model.Car;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
@@ -23,8 +26,11 @@ import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
 
 @CucumberContextConfiguration
 @SpringBootTest
@@ -57,6 +63,74 @@ public class StepDefsImplementation {
     public void the_rest_service_with_initial_car_data_id_is_available_and_the_method_is_supported(String endpoint, String id, String httpMethod) {
         requestType = HttpMethod.valueOf(httpMethod);
         requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint)).concat(id);
+    }
+
+    @Given("fot the REST car service the car data with id {string} is available and is returned the {string} {string} and the {string} {string}")
+    public void fotTheRESTCarServiceTheCarDataWithIdIsAvailableAndIsReturnedTheAndThe(String id, String brand, String brandValue, String model, String modelValue) {
+        WebTestClient
+                .bindToServer()
+                .baseUrl("http://localhost:8080")
+                .build()
+                .get()
+                .uri("/api/v1/car/103")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody().jsonPath("brand").isEqualTo(brandValue)
+                .jsonPath("model").isEqualTo(modelValue);
+
+//        WebTestClient testClient = WebTestClient.bindToServer().baseUrl("http://localhost:8080").build();
+////        webClient = WebClient.create("http://localhost:8080/api/v1/car/102");
+//
+//        testClient.get().uri("/api/v1/car/102")
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectBody()
+//                .json("{\"brand\":\"Volkswagen\"}");
+//
+//        Car newCar = new Car();
+//        newCar.setBrand("Polonez");
+//        newCar.setModel("Caro");
+//        newCar.setBodyType(BodyType.SEDAN);
+//        newCar.setFuelType(FuelType.PETROL);
+//        newCar.setYear(1998);
+//
+//        WebTestClient
+//                .bindToServer()
+//                .baseUrl("http://localhost:8080")
+//                .build()
+//                .post()
+//                .uri("/api/v1/car/")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(Mono.just(newCar), Car.class)
+//                .exchange()
+//                .expectStatus().isCreated()
+//                .expectHeader().valueEquals("Content-Type", "application/json")
+//                .expectBody().jsonPath("brand").isEqualTo("Polonez");
+////                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+////                .jsonPath("$.name").isNotEmpty()
+////                .jsonPath("$.name").isEqualTo("test-webclient-repository");
+//
+//
+////        FluxExchangeResult<Car> result = testClient.get().uri("/api/v1/car/102")
+////                .exchange()
+////                .expectStatus().isOk()
+////                .returnResult(Car.class);
+////
+////        Flux<Car> car = result.getResponseBody();
+////        byte[] byteCar = result.getResponseBodyContent();
+////
+////        WebTestClient.BodySpec carr = testClient.get().uri("/api/v1/car/102")
+////                .exchange()
+////                .expectStatus().isOk()
+////                .expectBody(Car.class);
+//
+////        testClient.get().uri("/api/v1/car/102")
+////                .exchange()
+////                .expectStatus().isOk()
+////                .expectBody(Car.class)
+////                .consumeWith(res -> {
+////                    // custom assertions (e.g. AssertJ)...
+////                });
     }
 
     @When("I send request with content type {string} to the service")
