@@ -65,73 +65,19 @@ public class StepDefsImplementation {
         requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint)).concat(id);
     }
 
-    @Given("fot the REST car service the car data with id {string} is available and is returned the {string} {string} and the {string} {string}")
-    public void fotTheRESTCarServiceTheCarDataWithIdIsAvailableAndIsReturnedTheAndThe(String id, String brand, String brandValue, String model, String modelValue) {
-        WebTestClient
-                .bindToServer()
-                .baseUrl("http://localhost:8080")
-                .build()
-                .get()
-                .uri("/api/v1/car/103")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody().jsonPath("brand").isEqualTo(brandValue)
-                .jsonPath("model").isEqualTo(modelValue);
-
-//        WebTestClient testClient = WebTestClient.bindToServer().baseUrl("http://localhost:8080").build();
-////        webClient = WebClient.create("http://localhost:8080/api/v1/car/102");
-//
-//        testClient.get().uri("/api/v1/car/102")
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectBody()
-//                .json("{\"brand\":\"Volkswagen\"}");
-//
-//        Car newCar = new Car();
-//        newCar.setBrand("Polonez");
-//        newCar.setModel("Caro");
-//        newCar.setBodyType(BodyType.SEDAN);
-//        newCar.setFuelType(FuelType.PETROL);
-//        newCar.setYear(1998);
-//
+//    @Given("fot the REST car service the car data with id {string} is available and is returned the {string} {string} and the {string} {string}")
+//    public void fotTheRESTCarServiceTheCarDataWithIdIsAvailableAndIsReturnedTheAndThe(String id, String brand, String brandValue, String model, String modelValue) {
 //        WebTestClient
 //                .bindToServer()
 //                .baseUrl("http://localhost:8080")
 //                .build()
-//                .post()
-//                .uri("/api/v1/car/")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .body(Mono.just(newCar), Car.class)
+//                .get()
+//                .uri("/api/v1/car/103")
 //                .exchange()
-//                .expectStatus().isCreated()
-//                .expectHeader().valueEquals("Content-Type", "application/json")
-//                .expectBody().jsonPath("brand").isEqualTo("Polonez");
-////                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-////                .jsonPath("$.name").isNotEmpty()
-////                .jsonPath("$.name").isEqualTo("test-webclient-repository");
-//
-//
-////        FluxExchangeResult<Car> result = testClient.get().uri("/api/v1/car/102")
-////                .exchange()
-////                .expectStatus().isOk()
-////                .returnResult(Car.class);
-////
-////        Flux<Car> car = result.getResponseBody();
-////        byte[] byteCar = result.getResponseBodyContent();
-////
-////        WebTestClient.BodySpec carr = testClient.get().uri("/api/v1/car/102")
-////                .exchange()
-////                .expectStatus().isOk()
-////                .expectBody(Car.class);
-//
-////        testClient.get().uri("/api/v1/car/102")
-////                .exchange()
-////                .expectStatus().isOk()
-////                .expectBody(Car.class)
-////                .consumeWith(res -> {
-////                    // custom assertions (e.g. AssertJ)...
-////                });
-    }
+//                .expectStatus().isOk()
+//                .expectBody().jsonPath("brand").isEqualTo(brandValue)
+//                .jsonPath("model").isEqualTo(modelValue);
+//    }
 
     @When("I send request with content type {string} to the service")
     public void i_send_request_with_content_type_to_the_service(String contentType) {

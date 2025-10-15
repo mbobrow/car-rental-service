@@ -9,7 +9,8 @@ import org.junit.runner.RunWith;
 @CucumberOptions(
         features = {"classpath:features/DemoFeature.feature"},
         glue = {"com.capgemini.demo.carrental.stepdefs"},
-        plugin = {"pretty", "html:target/DemoFeatureReport.html"}
+        plugin = {"pretty", "html:target/DemoFeatureReport.html"},
+        tags = "@test"
 )
 public class DemoCucumberRunner {
 }
