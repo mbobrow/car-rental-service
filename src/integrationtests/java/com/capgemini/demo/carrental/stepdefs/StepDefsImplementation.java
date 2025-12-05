@@ -1,12 +1,7 @@
 package com.capgemini.demo.carrental.stepdefs;
 
-import static com.capgemini.demo.carrental.util.ConstantUtils.CAR_SERVICE_ADDRESS;
-import static com.capgemini.demo.carrental.util.ConstantUtils.ENDPOINT_SELECTOR;
-
-import java.util.Map;
-
-import com.capgemini.demo.carrental.model.Car;
-import com.capgemini.demo.carrental.model.Rental;
+import com.capgemini.demo.carrental.model.CarAsInput;
+import com.capgemini.demo.carrental.model.CarAsResponse;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
@@ -15,7 +10,6 @@ import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
 
 import com.capgemini.demo.carrental.config.StepDefsConfig;
-import com.capgemini.demo.carrental.util.ResponseElementsEnum;
 import com.capgemini.demo.carrental.util.RestTemplateUtils;
 
 import org.junit.Assert;
@@ -55,8 +49,10 @@ public class StepDefsImplementation {
 
     private RestTemplate restTemplate = new RestTemplate();
     private ResponseEntity<String> response;
-    ResponseEntity<Car[]> responseCar;
-    ResponseEntity<Rental> responseRental;
+    private ResponseEntity<CarAsResponse> responseCar;
+    private CarAsInput inputCar = new CarAsInput();
+//    ResponseEntity<Car[]> responseCar;
+//    ResponseEntity<Rental> responseRental;
 
     //---------------Checking the correctness of the GET query
     @Given("the REST service with initial {string} data id {string} is available and the {string} method is supported")
@@ -77,7 +73,6 @@ public class StepDefsImplementation {
         headers.setContentType(MediaType.valueOf(contentType));
         HttpEntity<String> requestEntity = new HttpEntity("", headers);
         response = restTemplate.exchange(requestUrl, requestType, requestEntity, String.class);
-        System.out.println("");
     }
 
     @Then("the retrieved body should contains the {string} {string} and the {string} {string} and the status code {string}")
@@ -89,5 +84,30 @@ public class StepDefsImplementation {
         Assert.assertEquals(brandName, responseCar.get(brandKey));
         Assert.assertEquals(modelName, responseCar.get(modelKey));
         Assert.assertEquals("2017", responseCar.get("year").toString());
+    }
+
+    @Given("for the REST service for endpoint we have {string} {string} {string} {string} {int} for the {string} method")
+    public void forTheRESTServiceForEndpointWeHaveForTheMethod(String brand, String model, String bodyType, String fuel, int year, String httpMethod) {
+        requestUrl = "http://localhost:8080/api/v1/car/";
+        requestType = HttpMethod.valueOf(httpMethod);
+        inputCar.setBrand(brand);
+        inputCar.setModel(model);
+        inputCar.setBodyType(bodyType);
+        inputCar.setFuelType(fuel);
+        inputCar.setYear(year);
+    }
+
+    @When("I send request with body and content type {string} to the service")
+    public void iSendRequestWithBodyAndContentTypeToTheService(String contentType) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.valueOf(contentType));
+        HttpEntity<CarAsInput> requestEntity = new HttpEntity(inputCar, headers);
+        responseCar = restTemplate.exchange(requestUrl, requestType, requestEntity, CarAsResponse.class);
+    }
+
+    @Then("the retrieved body should contains the id and the status code {int}")
+    public void theRetrievedBodyShouldContainsTheIdAndTheStatusCode(int expectedStatusCode) {
+        Assert.assertEquals(expectedStatusCode, responseCar.getStatusCodeValue());
+        Assert.assertNotNull(responseCar.getBody().getId());
     }
 }
