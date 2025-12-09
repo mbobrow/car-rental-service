@@ -3,8 +3,6 @@ package com.capgemini.carrental.api;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-
 import com.capgemini.carrental.dto.request.TenantRequest;
 import com.capgemini.carrental.dto.response.TenantResponse;
 import com.capgemini.carrental.mapper.TenantEntityToResponseMapper;
@@ -12,6 +10,7 @@ import com.capgemini.carrental.mapper.TenantRequestToEntityMapper;
 import com.capgemini.carrental.model.Tenant;
 import com.capgemini.carrental.service.TenantService;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;

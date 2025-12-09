@@ -53,21 +53,21 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
                 request);
     }
 
-    @Override protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            final MethodArgumentNotValidException ex,
-            final HttpHeaders headers,
-            final HttpStatus status,
-            final WebRequest request) {
-        final List<String> errors = new ArrayList<>();
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errors.add(error.getField() + ": " + error.getDefaultMessage());
-        }
-        for (ObjectError error : ex.getBindingResult().getGlobalErrors()) {
-            errors.add(error.getObjectName() + ": " + error.getDefaultMessage());
-        }
-
-        final ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getLocalizedMessage(), errors);
-        return handleExceptionInternal(ex, apiError, headers, apiError.getStatus(), request);
-    }
+//    @Override protected ResponseEntity<Object> handleMethodArgumentNotValid(
+//            final MethodArgumentNotValidException ex,
+//            final HttpHeaders headers,
+//            final HttpStatus status,
+//            final WebRequest request) {
+//        final List<String> errors = new ArrayList<>();
+//        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+//            errors.add(error.getField() + ": " + error.getDefaultMessage());
+//        }
+//        for (ObjectError error : ex.getBindingResult().getGlobalErrors()) {
+//            errors.add(error.getObjectName() + ": " + error.getDefaultMessage());
+//        }
+//
+//        final ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getLocalizedMessage(), errors);
+//        return handleExceptionInternal(ex, apiError, headers, apiError.getStatus(), request);
+//    }
 
 }

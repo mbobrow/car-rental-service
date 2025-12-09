@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-
 import com.capgemini.carrental.dto.request.CarRequest;
 import com.capgemini.carrental.dto.response.CarResponse;
 import com.capgemini.carrental.mapper.CarEntityToResponseMapper;
@@ -13,6 +11,7 @@ import com.capgemini.carrental.mapper.CarRequestToEntityMapper;
 import com.capgemini.carrental.model.Car;
 import com.capgemini.carrental.service.CarService;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
