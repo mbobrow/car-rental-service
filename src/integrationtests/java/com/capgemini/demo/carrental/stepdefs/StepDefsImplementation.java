@@ -69,7 +69,7 @@ public class StepDefsImplementation {
         response = restTemplate.getForEntity(requestUrl, String.class);
         System.out.println("");
     }
-
+//comment
     @Then("the retrieved body should contains the {string} {string} and the {string} {string} and the status code {string}")
     public void the_retrieved_body_should_contains_the_brand_name_and_the_model_and_the_status_code(String brandKey, String brandName, String modelKey, String modelName, String expectedStatusCode) throws JSONException {
         int actualStatuSoceValue = response.getStatusCodeValue();
