@@ -10,7 +10,6 @@ import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
 
 import com.capgemini.demo.carrental.config.StepDefsConfig;
-import com.capgemini.demo.carrental.util.ResponseElementsEnum;
 import com.capgemini.demo.carrental.util.RestTemplateUtils;
 
 import org.junit.Assert;
