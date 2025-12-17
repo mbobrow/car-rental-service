@@ -1,10 +1,5 @@
 package com.capgemini.demo.carrental.stepdefs;
 
-import static com.capgemini.demo.carrental.util.ConstantUtils.CAR_SERVICE_ADDRESS;
-import static com.capgemini.demo.carrental.util.ConstantUtils.ENDPOINT_SELECTOR;
-
-import java.util.Map;
-
 import com.capgemini.demo.carrental.model.Car;
 import com.capgemini.demo.carrental.model.Rental;
 import io.cucumber.java.After;
