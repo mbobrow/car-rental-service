@@ -3,7 +3,7 @@ The Spring Boot REST micro-service with in-memory H2 data base to simulate simpl
 
 ## Swagger
 Here you can find the Swagger documentation.  
-Example URL with Swagger UI: http://localhost:8080/swagger-ui/#/
+Example URL with Swagger UI: http://localhost:8080/swagger-ui/index.html
 
 # H2 Data Base
 Here you can find H2 console.  
