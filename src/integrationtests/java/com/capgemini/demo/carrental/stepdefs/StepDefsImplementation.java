@@ -62,7 +62,7 @@ public class StepDefsImplementation {
     @Given("the REST service with initial {string} data id {string} is available and the {string} method is supported")
     public void the_rest_service_with_initial_car_data_id_is_available_and_the_method_is_supported(String endpoint, String id, String httpMethod) {
         requestType = HttpMethod.valueOf(httpMethod);
-        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint)).concat(id);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint)).concat("/").concat(id);
     }
 
     @When("I send request with content type {string} to the service")
