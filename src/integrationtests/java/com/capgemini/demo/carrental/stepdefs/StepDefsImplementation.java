@@ -5,6 +5,8 @@ import static com.capgemini.demo.carrental.util.ConstantUtils.ENDPOINT_SELECTOR;
 
 import java.util.Map;
 
+import com.capgemini.carrental.model.BodyType;
+import com.capgemini.carrental.model.FuelType;
 import com.capgemini.demo.carrental.model.Car;
 import com.capgemini.demo.carrental.model.Rental;
 import io.cucumber.java.After;
@@ -20,13 +22,17 @@ import com.capgemini.demo.carrental.util.RestTemplateUtils;
 
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.test.web.reactive.server.WebTestClient;
+//import reactor.core.publisher.Mono;
 
 @CucumberContextConfiguration
 @SpringBootTest
@@ -65,6 +71,20 @@ public class StepDefsImplementation {
         requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint)).concat("/").concat(id);
     }
 
+//    @Given("fot the REST car service the car data with id {string} is available and is returned the {string} {string} and the {string} {string}")
+//    public void fotTheRESTCarServiceTheCarDataWithIdIsAvailableAndIsReturnedTheAndThe(String id, String brand, String brandValue, String model, String modelValue) {
+//        WebTestClient
+//                .bindToServer()
+//                .baseUrl("http://localhost:8080")
+//                .build()
+//                .get()
+//                .uri("/api/v1/car/103")
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectBody().jsonPath("brand").isEqualTo(brandValue)
+//                .jsonPath("model").isEqualTo(modelValue);
+//    }
+
     @When("I send request with content type {string} to the service")
     public void i_send_request_with_content_type_to_the_service(String contentType) {
         ResponseEntity<String> response = restTemplateUtils.processHttpRequest(requestType, requestBody.toString(), requestUrl, contentType);
@@ -79,5 +99,87 @@ public class StepDefsImplementation {
         JSONObject jsonResponseBody = new JSONObject(responseBody);
         Assert.assertEquals(brandName, jsonResponseBody.get(brandKey).toString());
         Assert.assertEquals(modelName, jsonResponseBody.get(modelKey).toString());
+    }
+
+    @Given("the REST get all {string} service is available and the {string} method is supported")
+    public void theRESTGetAllServiceIsAvailableAndTheMethodIsSupported(String endpoint, String httpMethod) {
+        requestType = HttpMethod.valueOf(httpMethod);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint));
+    }
+
+    @Then("the retrieved body should contains the list of cars and the status code {string}")
+    public void theRetrievedBodyShouldContainsTheListOfCarsAndTheStatusCode(String expectedStatusCode) throws JSONException {
+        Assert.assertEquals(expectedStatusCode, responseStatusCode);
+        JSONArray jsonResponseBody = new JSONArray(responseBody);
+        Assert.assertEquals(21, jsonResponseBody.length());
+    }
+    //---------------Add car and remove it
+    @Given("the REST service with {string} brand {string}, model {string}, body type {string}, fuel type {string} and year of production {int} is available and the {string} method is supported")
+    public void theRESTServiceWithCarBrandModelBodyTypeFuelTypeAndYearOfProductionIsAvailableAndTheMethodIsSupported(String endpoint, String brand, String model, String type, String fuel, int year, String httpMethod)
+            throws JSONException {
+        requestType = HttpMethod.valueOf(httpMethod);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint));
+        requestBody.put("bodyType", type);
+        requestBody.put("brand", brand);
+        requestBody.put("fuelType", fuel);
+        requestBody.put("model", model);
+        requestBody.put("year", year);
+    }
+
+    @Then("the retrieved body should contain the {string} of the {string} {string} and the status code {string}")
+    public void theRetrievedBodyShouldContainTheOfTheAddedCarAndTheStatusCode(String fieldKey, String operationType, String endpoint, String expectedStatusCode) throws JSONException {
+        Assert.assertEquals(expectedStatusCode, responseStatusCode);
+        JSONObject jsonResponseBody = new JSONObject(responseBody);
+        Assert.assertTrue("Response body does not contain \"id\" property", jsonResponseBody.has("id"));
+        id = (Integer) jsonResponseBody.get(fieldKey);
+        Assert.assertNotNull(id);
+    }
+
+    @Given("the REST service with previously created {string} id is available and the {string} method is supported")
+    public void theRESTServiceWithPreviouslyCreatedIdIsAvailableAndTheMethodIsSupported(String endpoint, String httpMethod) {
+        requestType = HttpMethod.valueOf(httpMethod);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint)).concat("/").concat(Integer.toString(id));
+    }
+    //---------------Remove the car that does not exist
+    @Then("the response status code {string}")
+    public void theResponseStatusCode(String expectedStatusCode) {
+        Assert.assertEquals(expectedStatusCode, responseStatusCode);
+    }
+    //---------------Change year of the car
+    @Given("the REST service with {string} id {string}, brand {string}, model {string}, body type {string}, fuel type {string} and year of production {string} is available and the {string} method is supported")
+    public void theRESTServiceWithCarIdCarBrandModelBodyTypeFuelTypeAndYearOfProductionIsAvailableAndTheMethodIsSupported(String endpoint, String id, String brand, String model, String type, String fuel, String year, String httpMethod)
+            throws JSONException {
+        requestType = HttpMethod.valueOf(httpMethod);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint)).concat("/").concat(id);
+        requestBody.put("bodyType", type);
+        requestBody.put("brand", brand);
+        requestBody.put("fuelType", fuel);
+        requestBody.put("model", model);
+        requestBody.put("year", year);
+    }
+    //---------------Add a car to non-existing rental
+    @Given("the REST service for {string} with beginning date {string}, end date {string}, car id {string} and tenant id {string} is available and the {string} method is supported")
+    public void theRESTServiceForWithBeginningDateEndDateCarIdAndTenantIdIsAvailableAndTheMethodIsSupported(String endpoint, String beginningOfRental, String endOfRental, String carId, String tenantId, String httpMethod)
+            throws JSONException {
+        requestType = HttpMethod.valueOf(httpMethod);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint));
+        requestBody.put("beginningOfRental", beginningOfRental);
+        requestBody.put("carIds", new JSONArray().put(carId));
+        requestBody.put("endOfRental", endOfRental);
+        requestBody.put("tenantId", tenantId);
+    }
+    //---------------Create new rental
+    @Then("the retrieved rental body should contain the {string} {string} and the {string} {string} and the status code {string}")
+    public void theRetrievedRentalBodyShouldContainTheAndTheAndTheStatusCode(String field1key, String field1expected, String field2key, String field2expected, String expectedStatusCode) {
+        Assert.assertEquals(expectedStatusCode, responseStatusCode);
+        Assert.assertTrue(responseBody.contains("\""+field1key+"\" : \""+field1expected+"\""));
+        Assert.assertTrue(responseBody.contains("\""+field2key+"\" : \""+field2expected+"\""));
+    }
+    //---------------Check if rented car is available for rental
+    @Then("the retrieved body should not contain the {string} {string} and the {string} {string} and the status code {string}")
+    public void theRetrievedBodyShouldNotContainTheAndTheAndTheStatusCode(String field1key, String field1expected, String field2key, String field2expected, String expectedStatusCode) {
+        Assert.assertEquals(expectedStatusCode, responseStatusCode);
+        Assert.assertFalse(responseBody.contains("\""+field1key+"\" : \""+field1expected+"\""));
+        Assert.assertFalse(responseBody.contains("\""+field2key+"\" : \""+field2expected+"\""));
     }
 }
