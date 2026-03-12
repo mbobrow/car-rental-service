@@ -3,6 +3,9 @@ package com.capgemini.demo.carrental.stepdefs;
 import static com.capgemini.demo.carrental.util.ConstantUtils.CAR_SERVICE_ADDRESS;
 import static com.capgemini.demo.carrental.util.ConstantUtils.ENDPOINT_SELECTOR;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import com.capgemini.carrental.model.BodyType;
@@ -124,6 +127,23 @@ public class StepDefsImplementation {
         requestBody.put("fuelType", fuel);
         requestBody.put("model", model);
         requestBody.put("year", year);
+    }
+
+    @Given("the REST service with {string} i endpoint is available and the {string} method is supported for the file {string}")
+    public void theRESTServiceWithIEndpointIsAvailableAndTheMethodIsSupportedForTheFile(String endpoint, String httpMethod, String fileName) {
+        requestType = HttpMethod.valueOf(httpMethod);
+        requestUrl = CAR_SERVICE_ADDRESS.concat(ENDPOINT_SELECTOR.get(endpoint));
+        String fileNameWithPath = "src/integrationtests/resources/testdata/".concat(fileName);
+        String content = null;
+        try {
+            content = new String(Files.readAllBytes(Paths.get(fileNameWithPath)));
+            requestBody = new JSONObject(content);
+            System.out.println();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Then("the retrieved body should contain the {string} of the {string} {string} and the status code {string}")
